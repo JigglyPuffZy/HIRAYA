@@ -8,9 +8,9 @@ node_modules/
 dist/
 web-build/
 expo-env.d.ts
+supabase/.temp/
 
 # Native
-.kotlin/
 *.orig.*
 *.jks
 *.p8
@@ -30,12 +30,23 @@ yarn-error.*
 .DS_Store
 *.pem
 
-# local env files
+# local env files / secrets
+.env
 .env*.local
 
 # typescript
 *.tsbuildinfo
 
-# generated native folders
-/ios
-/android
+# SQL / DB migrations (already applied on Supabase — not needed in app repo)
+supabase/migrations/
+**/*.sql
+
+# Python backend local artifacts & training data (APK uses Supabase Edge ML)
+backend/.venv/
+backend/__pycache__/
+backend/**/__pycache__/
+backend/*.db
+backend/.env
+backend/data/
+backend/models/
+backend/node_modules/
