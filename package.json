@@ -30,8 +30,9 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "build:apk": "eas build -p android --profile preview",
-    "build:aab": "eas build -p android --profile production",
+    "build:apk": "eas build -p android --profile preview --non-interactive",
+    "build:aab": "eas build -p android --profile production --non-interactive",
+    "release:apk": "npm run typecheck && eas build -p android --profile preview --non-interactive",
     "typecheck": "tsc --noEmit",
     "backend:train": "cd backend && set PYTHONPATH=.&& .venv\\Scripts\\python.exe scripts\\train_model.py",
     "backend:start": "cd backend && set PYTHONPATH=.&& .venv\\Scripts\\uvicorn.exe app.main:app --host 0.0.0.0 --port 8000"

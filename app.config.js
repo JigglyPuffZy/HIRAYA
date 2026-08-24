@@ -1,6 +1,8 @@
 const appJson = require('./app.json');
 
 const apiUrl = (process.env.EXPO_PUBLIC_API_URL || '').trim();
+const supabaseUrl = (process.env.EXPO_PUBLIC_SUPABASE_URL || '').trim();
+const supabaseAnonKey = (process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || '').trim();
 const allowCleartext =
   process.env.EXPO_PUBLIC_ALLOW_CLEARTEXT === 'true' ||
   apiUrl.startsWith('http://');
@@ -21,6 +23,15 @@ module.exports = {
           ? { NSAllowsLocalNetworking: true, NSAllowsArbitraryLoads: true }
           : { NSAllowsLocalNetworking: false },
       },
+    },
+    // Bake public config into the binary so APK auth works even if Metro
+    // process.env inlining is incomplete.
+    extra: {
+      ...(appJson.expo.extra || {}),
+      supabaseUrl,
+      supabaseAnonKey,
+      apiUrl,
+      allowCleartext,
     },
   },
 };

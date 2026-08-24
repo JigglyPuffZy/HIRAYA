@@ -1,12 +1,35 @@
-const getEnv = (key: string, fallback = ''): string => {
-  const value = process.env[key];
-  return value?.trim() ?? fallback;
+import Constants from 'expo-constants';
+
+type ExtraConfig = {
+  supabaseUrl?: string;
+  supabaseAnonKey?: string;
+  apiUrl?: string;
+  allowCleartext?: boolean;
+};
+
+const extra = (Constants.expoConfig?.extra ?? {}) as ExtraConfig;
+
+const getEnv = (key: string, extraValue?: string, fallback = ''): string => {
+  const fromProcess = process.env[key]?.trim();
+  if (fromProcess) {
+    return fromProcess;
+  }
+
+  const fromExtra = extraValue?.trim();
+  if (fromExtra) {
+    return fromExtra;
+  }
+
+  return fallback;
 };
 
 export const env = {
-  apiUrl: getEnv('EXPO_PUBLIC_API_URL'),
-  supabaseUrl: getEnv('EXPO_PUBLIC_SUPABASE_URL'),
-  supabaseAnonKey: getEnv('EXPO_PUBLIC_SUPABASE_ANON_KEY'),
+  apiUrl: getEnv('EXPO_PUBLIC_API_URL', extra.apiUrl),
+  supabaseUrl: getEnv('EXPO_PUBLIC_SUPABASE_URL', extra.supabaseUrl),
+  supabaseAnonKey: getEnv(
+    'EXPO_PUBLIC_SUPABASE_ANON_KEY',
+    extra.supabaseAnonKey,
+  ),
   /** Optional override: openmeteo | weatherapi | openweather */
   weatherProvider: getEnv('EXPO_PUBLIC_WEATHER_PROVIDER'),
   /** WeatherAPI.com — optional fallback when EXPO_PUBLIC_WEATHER_PROVIDER=weatherapi */
@@ -15,7 +38,7 @@ export const env = {
   openWeatherApiKey: getEnv('EXPO_PUBLIC_WEATHER_API_KEY'),
   defaultLatitude: getEnv('EXPO_PUBLIC_DEFAULT_LATITUDE'),
   defaultLongitude: getEnv('EXPO_PUBLIC_DEFAULT_LONGITUDE'),
-  apiTimeoutMs: getEnv('EXPO_PUBLIC_API_TIMEOUT_MS', '30000'),
+  apiTimeoutMs: getEnv('EXPO_PUBLIC_API_TIMEOUT_MS', undefined, '30000'),
   devManualHeat: getEnv('EXPO_PUBLIC_DEV_MANUAL_HEAT') === 'true',
 } as const;
 
@@ -36,14 +59,16 @@ export function getActiveWeatherProvider(): WeatherProvider {
     return 'openmeteo';
   }
 
-  // Default: Open-Meteo for Tuguegarao (free, no API key).
+  // Default: Open-Meteo for Tuguegarao (free, no key needed).
   return 'openmeteo';
 }
 
 export const isApiConfigured = (): boolean => env.apiUrl.length > 0;
 
 export const isSupabaseConfigured = (): boolean =>
-  env.supabaseUrl.length > 0 && env.supabaseAnonKey.length > 0;
+  env.supabaseUrl.length > 0 &&
+  env.supabaseAnonKey.length > 0 &&
+  !env.supabaseUrl.includes('placeholder');
 
 /** True when EXPO_PUBLIC_API_URL points at Supabase Edge Functions. */
 export const isSupabaseFunctionsApi = (): boolean =>
@@ -58,4 +83,3 @@ export const isWeatherConfigured = isWeatherApiConfigured;
 export function getWeatherConfigHint(): string {
   return 'Weather uses Open-Meteo for Tuguegarao by default. Optional: set EXPO_PUBLIC_WEATHER_PROVIDER to weatherapi or openweather with the matching API key.';
 }
-

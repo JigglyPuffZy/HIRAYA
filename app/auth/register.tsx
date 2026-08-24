@@ -61,7 +61,7 @@ export default function RegisterScreen() {
       });
       router.replace(await resolvePostAuthRoute(session.user.id));
     } catch {
-      // Error is handled in auth context.
+      // Error (including email-confirm instructions) shown via auth context.
     } finally {
       setIsSubmitting(false);
     }

@@ -33,6 +33,7 @@ yarn-error.*
 # local env files / secrets
 .env
 .env*.local
+eas-build-view.json
 
 # typescript
 *.tsbuildinfo

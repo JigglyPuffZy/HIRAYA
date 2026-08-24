@@ -73,7 +73,19 @@ export const authService = {
     });
 
     if (error || !data.session) {
-      throw mapSupabaseError(error ?? { message: 'Unable to sign in.' });
+      const raw = error?.message ?? 'Unable to sign in.';
+      if (/email not confirmed/i.test(raw)) {
+        throw mapSupabaseError({
+          message:
+            'Confirm your email first (check inbox/spam), then sign in. Or disable Confirm email in Supabase Auth settings.',
+        });
+      }
+      if (/invalid login credentials/i.test(raw)) {
+        throw mapSupabaseError({
+          message: 'Wrong email or password. If you just registered, confirm your email first.',
+        });
+      }
+      throw mapSupabaseError(error ?? { message: raw });
     }
 
     return persistSession(data.session);
@@ -93,12 +105,19 @@ export const authService = {
     });
 
     if (error) {
+      const raw = error.message;
+      if (/already registered|already been registered|user already/i.test(raw)) {
+        throw mapSupabaseError(
+          { message: 'This email is already registered. Try signing in instead.' },
+          409,
+        );
+      }
       throw mapSupabaseError(error, 409);
     }
 
     if (!data.session) {
       throw new ApiError(
-        'Account created. Check your email to confirm your address, then sign in.',
+        'Account created. Confirm your email (inbox/spam), then sign in. Tip: in Supabase → Authentication → Providers → Email, turn OFF “Confirm email” for easier APK testing.',
         202,
       );
     }

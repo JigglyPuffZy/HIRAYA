@@ -1,0 +1,13 @@
+# Keep EAS Android app archive small and free of non-mobile junk
+/backend/
+/.venv/
+**/.venv/
+**/__pycache__/
+**/*.pyc
+**/*.db
+**/*.joblib
+/supabase/migrations/
+**/*.sql
+/doc_extract.txt
+/eas-build-view.json
+/.git/
