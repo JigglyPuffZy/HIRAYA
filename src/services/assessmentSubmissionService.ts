@@ -27,13 +27,14 @@ import {
   buildStructuredSafetyRecommendations,
   flattenSafetySections,
 } from '@/services/safety-recommendations/safety-recommendation.engine';
-import { combineTreeAndMlRiskLevel } from '@/config/risk-assessment.config';
+import { combineTreeAndMlRiskLevel, RISK_LEVEL_ORDER } from '@/config/risk-assessment.config';
 import { RiskLevelCategory } from '@/constants/riskLevels';
 import { CurrentWeatherSnapshot, EnvironmentalSnapshot, HeatDataSource } from '@/types/environmental';
 import {
   AssessmentRecordSource,
   supabaseAssessmentRecordsService,
 } from '@/services/supabase';
+import { predictConditionAwareBackup } from '@/services/decision-tree/condition-heat-ml-backup';
 import { AssessmentHistorySource } from '@/constants/assessmentHistorySource';
 
 function createRecordId(): string {
@@ -50,7 +51,7 @@ function assessmentToPrediction(
     profile,
   });
 
-  const finalLevel = mlPrediction
+  const combinedLevel = mlPrediction
     ? combineTreeAndMlRiskLevel(
         treeResult.level,
         mlPrediction.riskLevel as RiskLevelCategory,
@@ -58,17 +59,26 @@ function assessmentToPrediction(
       )
     : treeResult.level;
 
+  const candidates = [treeResult.level, combinedLevel];
+  if (mlPrediction?.riskLevel) {
+    candidates.push(mlPrediction.riskLevel as RiskLevelCategory);
+  }
+
+  const finalLevel = candidates.reduce((best, level) =>
+    RISK_LEVEL_ORDER.indexOf(level) > RISK_LEVEL_ORDER.indexOf(best) ? level : best,
+  treeResult.level);
+
   const finalScore = treeResult.riskScore;
 
   return {
     prediction: finalScore,
     riskLevel: finalLevel,
     model: 'HIRAYA',
-    modelVersion: '2.0.0',
+    modelVersion: mlPrediction?.modelVersion ?? '2.0.0',
     timestamp: treeResult.assessedAt,
     recommendations: flattenSafetySections(structured.sections),
     primaryRiskFactors: treeResult.primaryRiskFactors,
-    riskExplanation: treeResult.reason,
+    riskExplanation: mlPrediction?.riskExplanation ?? treeResult.reason,
     structuredRecommendations: structured.sections,
     healthConditions: treeResult.healthConditions,
   };
@@ -106,30 +116,34 @@ async function resolveEnvironmentalForAssessment(): Promise<EnvironmentalSnapsho
   return environmentalService.fetchWithFallback();
 }
 
-async function tryOptionalMlPrediction(
+async function resolveMlOrConditionBackup(
   userInputs: AssessmentInputData,
   normalizedWeather: ReturnType<typeof buildEnvironmentalData>,
   token: string,
   profileData: AssessmentInputData,
-): Promise<HeatRiskPrediction | undefined> {
-  if (!isApiConfigured()) {
-    return undefined;
+): Promise<HeatRiskPrediction> {
+  if (isApiConfigured()) {
+    const backendUp = await isBackendQuicklyReachable();
+    if (backendUp) {
+      try {
+        return await predictHeatRisk(userInputs, normalizedWeather, {
+          token,
+          profile: profileData,
+          timeoutMs: ASSESSMENT_ML_TIMEOUT_MS,
+        });
+      } catch {
+        // Fall through to on-device condition backup.
+      }
+    }
   }
 
-  const backendUp = await isBackendQuicklyReachable();
-  if (!backendUp) {
-    return undefined;
-  }
-
-  try {
-    return await predictHeatRisk(userInputs, normalizedWeather, {
-      token,
-      profile: profileData,
-      timeoutMs: ASSESSMENT_ML_TIMEOUT_MS,
-    });
-  } catch {
-    return undefined;
-  }
+  // ML backup: disease-aware on-device scorer (HIGH/EXTREME depends on sakit).
+  return predictConditionAwareBackup({
+    heatIndexC: Number(normalizedWeather.heatIndex ?? normalizedWeather.feelsLike ?? 32),
+    humidity: Number(normalizedWeather.humidity ?? 70),
+    vulnerability: userInputs,
+    profile: profileData,
+  });
 }
 
 export const assessmentSubmissionService = {
@@ -151,7 +165,13 @@ export const assessmentSubmissionService = {
       longitude: STUDY_AREA.longitude,
     });
     const submittedAt = new Date().toISOString();
-    const prediction = assessmentToPrediction(treeResult, profileData);
+    const conditionBackup = predictConditionAwareBackup({
+      heatIndexC: weatherSnapshot.heatIndex,
+      humidity: weatherSnapshot.humidity,
+      vulnerability: {},
+      profile: profileData,
+    });
+    const prediction = assessmentToPrediction(treeResult, profileData, conditionBackup);
 
     const payload: RiskResultPayload = {
       prediction,
@@ -204,7 +224,7 @@ export const assessmentSubmissionService = {
       profile: profileData,
     });
 
-    const mlPrediction = await tryOptionalMlPrediction(
+    const mlPrediction = await resolveMlOrConditionBackup(
       userInputs as AssessmentInputData,
       normalizedWeather,
       token,

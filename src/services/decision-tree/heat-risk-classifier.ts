@@ -220,10 +220,37 @@ function applyCriticalOverrides(
   const hasSevereCondition = conditions.some(
     (id) => DISEASE_RISK_CONFIG[id].heatVulnerability === 'severe',
   );
+  const hasHighTierCondition = conditions.some(
+    (id) => DISEASE_RISK_CONFIG[id].heatVulnerability === 'high',
+  );
   const isDangerousEnvironment = environmentalLevel === 'EXTREME';
   const isHighEnvironment = RISK_LEVEL_ORDER.indexOf(environmentalLevel) >= 2;
+  const isCautionOrAbove = RISK_LEVEL_ORDER.indexOf(environmentalLevel) >= 1;
   const isElderly =
     typeof input.age === 'number' && Number.isFinite(input.age) && input.age >= 60;
+
+  // Severe sakit (heart / kidney / COPD) in hot weather → at least HIGH
+  if (hasSevereCondition && isHighEnvironment) {
+    level = RISK_LEVEL_ORDER.indexOf(level) < RISK_LEVEL_ORDER.indexOf('HIGH')
+      ? 'HIGH'
+      : level;
+  }
+
+  // Severe sakit + extreme heat or high heat with dehydration/high activity → EXTREME
+  if (
+    hasSevereCondition &&
+    (isDangerousEnvironment ||
+      (isHighEnvironment && (hydration === 'dehydrated' || activity === 'high')))
+  ) {
+    return 'EXTREME';
+  }
+
+  // High-tier sakit (asthma, hypertension, diabetes, …) in hot weather → at least HIGH
+  if (hasHighTierCondition && isHighEnvironment) {
+    level = RISK_LEVEL_ORDER.indexOf(level) < RISK_LEVEL_ORDER.indexOf('HIGH')
+      ? 'HIGH'
+      : level;
+  }
 
   if (
     hydration === 'dehydrated' &&
@@ -236,16 +263,27 @@ function applyCriticalOverrides(
     return 'EXTREME';
   }
 
-  if (isElderly && conditions.length > 0 && isDangerousEnvironment) {
-    return escalateLevel(level, 1);
+  if (isElderly && conditions.length > 0 && isHighEnvironment) {
+    level = escalateLevel(level, 1);
   }
 
   if (general === 'not_well' && isHighEnvironment) {
-    return escalateLevel(level, 1);
+    level = escalateLevel(level, 1);
   }
 
-  if (conditions.length >= 2 && isHighEnvironment && vulnerabilityScore >= 35) {
-    return escalateLevel(level, 1);
+  // Multiple sakit amplify risk toward HIGH / EXTREME
+  if (conditions.length >= 2 && isCautionOrAbove) {
+    level = RISK_LEVEL_ORDER.indexOf(level) < RISK_LEVEL_ORDER.indexOf('HIGH')
+      ? 'HIGH'
+      : level;
+  }
+
+  if (conditions.length >= 2 && isHighEnvironment && (hasSevereCondition || vulnerabilityScore >= 35)) {
+    return 'EXTREME';
+  }
+
+  if (conditions.length >= 3 && isHighEnvironment) {
+    return 'EXTREME';
   }
 
   return level;
