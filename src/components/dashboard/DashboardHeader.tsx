@@ -1,16 +1,17 @@
 import { useMemo } from 'react';
 import { Ionicons } from '@expo/vector-icons';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Image, Pressable, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { AppText } from '@/components/ui/AppText';
 import { GradientSurface } from '@/components/ui/GradientSurface';
 import { ROUTES } from '@/constants/routes';
 import { STUDY_AREA_LABEL } from '@/constants/study-area';
-import { DASHBOARD_ICONS } from '@/constants/dashboardIcons';
 import { formatRelativeTime } from '@/utils/formatters';
 import { FontSize, Spacing, BorderRadius, getTimeBasedGreeting } from '@/constants/theme';
 import { useResponsiveLayout } from '@/hooks/useResponsiveLayout';
 import { useTheme } from '@/context/ThemeContext';
+
+const LOGO = require('../../../assets/hiraya-logo.png');
 
 interface DashboardHeaderProps {
   userName?: string;
@@ -66,15 +67,10 @@ export function DashboardHeader({ userName, lastUpdated }: DashboardHeaderProps)
           alignItems: 'center',
           justifyContent: 'space-between',
         },
-        brandRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
-        logoMark: {
-          width: 40,
-          height: 40,
-          borderRadius: 14,
-          backgroundColor: colors.primary,
-          alignItems: 'center',
-          justifyContent: 'center',
-          ...shadows.sm,
+        brandRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, flex: 1, minWidth: 0 },
+        logoImage: {
+          width: 148,
+          height: 44,
         },
         brand: {
           color: colors.primary,
@@ -164,17 +160,12 @@ export function DashboardHeader({ userName, lastUpdated }: DashboardHeaderProps)
         <View style={styles.heroInner}>
           <View style={styles.heroTop}>
             <View style={styles.brandRow}>
-              <View style={styles.logoMark}>
-                <Ionicons name={DASHBOARD_ICONS.brand} size={20} color={colors.onPrimary} />
-              </View>
-              <View>
-                <AppText variant="label" style={styles.brand}>
-                  HIRAYA
-                </AppText>
-                <AppText variant="caption" style={styles.tagline}>
-                  Heat Safety Platform
-                </AppText>
-              </View>
+              <Image
+                source={LOGO}
+                accessibilityLabel="HIRAYA logo"
+                resizeMode="contain"
+                style={styles.logoImage}
+              />
             </View>
 
             <Pressable

@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ScreenContainer } from '@/components/layout/ScreenContainer';
 import { OnboardingSlideView } from '@/components/onboarding/OnboardingSlideView';
 import { Button } from '@/components/ui/Button';
-import { AppText } from '@/components/ui/AppText';
+import { BrandLogo } from '@/components/ui/BrandLogo';
 import { ONBOARDING_SLIDES } from '@/constants/onboarding';
 import { ROUTES } from '@/constants/routes';
 import { useOnboarding } from '@/hooks/useOnboarding';
@@ -38,9 +38,7 @@ export default function OnboardingScreen() {
   return (
     <ScreenContainer scrollable={false} showTopAccent decorative>
       <View style={styles.header}>
-        <AppText variant="label" style={styles.brand}>
-          HIRAYA
-        </AppText>
+        <BrandLogo size="sm" style={styles.headerLogo} />
         <Button title="Skip" variant="ghost" size="sm" onPress={handleSkip} />
       </View>
 
@@ -79,10 +77,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: Spacing.sm,
   },
-  brand: {
-    color: Colors.primary,
-    letterSpacing: 1.5,
-    fontSize: 15,
+  headerLogo: {
+    alignSelf: 'flex-start',
   },
   slideScroll: {
     flex: 1,

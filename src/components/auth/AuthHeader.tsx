@@ -1,8 +1,8 @@
 import { StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/ui/AppText';
+import { BrandLogo } from '@/components/ui/BrandLogo';
 import { GradientSurface } from '@/components/ui/GradientSurface';
-import { IconCircle } from '@/components/ui/IconCircle';
-import { FontSize, Spacing, BorderRadius } from '@/constants/theme';
+import { FontSize, Spacing } from '@/constants/theme';
 import { useTheme } from '@/context/ThemeContext';
 
 interface AuthHeaderProps {
@@ -30,15 +30,7 @@ export function AuthHeader({ title, subtitle }: AuthHeaderProps) {
           ]}
         />
         <View style={styles.content}>
-          <IconCircle
-            name="flame"
-            size={64}
-            iconSize={30}
-            color={colors.onPrimary}
-            backgroundColor={colors.primary}
-            elevated
-          />
-          <AppText style={[styles.brand, { color: colors.primary }]}>HIRAYA</AppText>
+          <BrandLogo size="lg" />
           <AppText style={[styles.title, { color: colors.text }]}>{title}</AppText>
           {subtitle ? (
             <AppText style={[styles.subtitle, { color: colors.textMuted }]}>
@@ -55,9 +47,6 @@ const styles = StyleSheet.create({
   container: {
     marginBottom: Spacing.xs,
   },
-  heroCard: {
-    borderWidth: 1,
-  },
   decorOrb: {
     position: 'absolute',
     width: 100,
@@ -72,18 +61,13 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
     padding: Spacing.xl,
   },
-  brand: {
-    fontSize: FontSize.xs,
-    fontWeight: '800',
-    letterSpacing: 3,
-    marginTop: Spacing.xs,
-  },
   title: {
     fontSize: FontSize.xxl,
     fontWeight: '800',
     lineHeight: 38,
     textAlign: 'center',
     letterSpacing: -0.6,
+    marginTop: Spacing.xs,
   },
   subtitle: {
     fontSize: FontSize.md,

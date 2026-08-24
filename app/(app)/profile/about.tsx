@@ -3,6 +3,7 @@ import { ScreenContainer } from '@/components/layout/ScreenContainer';
 import { Header } from '@/components/layout/Header';
 import { Card } from '@/components/ui/Card';
 import { AppText } from '@/components/ui/AppText';
+import { BrandLogo } from '@/components/ui/BrandLogo';
 import { APP_INFO } from '@/constants/appInfo';
 import { Spacing } from '@/constants/theme';
 
@@ -12,7 +13,7 @@ export default function AboutScreen() {
       <Header title="About HIRAYA" subtitle="Heat-risk awareness for Tuguegarao." showBack />
 
       <Card style={styles.card}>
-        <AppText variant="title">{APP_INFO.name}</AppText>
+        <BrandLogo size="lg" />
         <AppText variant="body" muted>
           Version {APP_INFO.version}
         </AppText>
@@ -31,9 +32,11 @@ export default function AboutScreen() {
 const styles = StyleSheet.create({
   card: {
     gap: Spacing.sm,
+    alignItems: 'center',
   },
   paragraph: {
     lineHeight: 22,
     marginTop: Spacing.sm,
+    alignSelf: 'stretch',
   },
 });

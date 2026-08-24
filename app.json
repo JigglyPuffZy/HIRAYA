@@ -8,9 +8,9 @@
     "scheme": "hiraya",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/hiraya-logo.png",
       "resizeMode": "contain",
-      "backgroundColor": "#DC2626"
+      "backgroundColor": "#FFFFFF"
     },
     "ios": {
       "supportsTablet": true,
@@ -22,15 +22,15 @@
       "versionCode": 1,
       "usesCleartextTraffic": false,
       "adaptiveIcon": {
-        "backgroundColor": "#DC2626",
-        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundColor": "#FFFFFF",
+        "foregroundImage": "./assets/hiraya-logo.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false
     },
     "web": {
-      "favicon": "./assets/favicon.png",
+      "favicon": "./assets/hiraya-logo.png",
       "bundler": "metro"
     },
     "plugins": [
