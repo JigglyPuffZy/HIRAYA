@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react';
 import { assessmentSubmissionService } from '@/services/assessmentSubmissionService';
 import { authService } from '@/services/authService';
 import { useAuth } from '@/hooks/useAuth';
+import { ASSESSMENT_STEP_MIN_MS } from '@/constants/liveRefresh';
 import {
   AssessmentSubmissionError,
   AssessmentSubmissionStep,
@@ -48,7 +49,9 @@ export function useAssessmentSubmission() {
         );
 
         setSubmissionStep('complete');
-        await new Promise((resolve) => setTimeout(resolve, 700));
+        await new Promise((resolve) =>
+          setTimeout(resolve, ASSESSMENT_STEP_MIN_MS.complete),
+        );
         return result;
       } catch (error) {
         if (error instanceof AssessmentSubmissionError) {
