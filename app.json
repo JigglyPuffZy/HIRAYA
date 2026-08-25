@@ -2,7 +2,7 @@
   "expo": {
     "name": "HIRAYA",
     "slug": "HIRAYA",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "scheme": "hiraya",
@@ -19,8 +19,12 @@
     },
     "android": {
       "package": "com.hiraya.app",
-      "versionCode": 1,
+      "versionCode": 3,
       "usesCleartextTraffic": false,
+      "permissions": [
+        "android.permission.INTERNET",
+        "android.permission.ACCESS_NETWORK_STATE"
+      ],
       "adaptiveIcon": {
         "backgroundColor": "#FFFFFF",
         "foregroundImage": "./assets/hiraya-logo.png",

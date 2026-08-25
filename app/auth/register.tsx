@@ -106,6 +106,12 @@ export default function RegisterScreen() {
 
           {error ? <ErrorMessage message={error} /> : null}
 
+          <AppText variant="caption" muted style={styles.hint}>
+            Use a real email and password (8+ characters). If create account says
+            “confirm email”, open Supabase → Authentication → Providers → Email and
+            turn OFF Confirm email, then try again.
+          </AppText>
+
           <AuthButton
             title="Create Account"
             onPress={handleRegister}
@@ -149,6 +155,9 @@ const styles = StyleSheet.create({
   },
   form: {
     gap: Spacing.md,
+  },
+  hint: {
+    lineHeight: 18,
   },
   footer: {
     alignItems: 'center',

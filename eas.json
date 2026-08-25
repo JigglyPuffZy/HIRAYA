@@ -26,6 +26,12 @@
     "production": {
       "android": {
         "buildType": "app-bundle"
+      },
+      "env": {
+        "EXPO_PUBLIC_SUPABASE_URL": "https://lpnxvbziqwrevxguypji.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxwbnh2YnppcXdyZXZ4Z3V5cGppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyMTU2MjcsImV4cCI6MjA5Nzc5MTYyN30.l5VxiYwuv0KGChTViAcgQeX2Ft30Cu8cmM1AoCjIg4g",
+        "EXPO_PUBLIC_API_URL": "https://lpnxvbziqwrevxguypji.supabase.co/functions/v1",
+        "EXPO_PUBLIC_ALLOW_CLEARTEXT": "false"
       }
     }
   },

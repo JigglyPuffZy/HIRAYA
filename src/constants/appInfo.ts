@@ -1,6 +1,6 @@
 export const APP_INFO = {
   name: 'HIRAYA',
-  version: '1.0.0',
+  version: '1.0.1',
   packageName: 'com.hiraya.app',
   studyArea: 'Tuguegarao City, Cagayan',
   medicalDisclaimer:

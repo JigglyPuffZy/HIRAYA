@@ -1,18 +1,34 @@
 const appJson = require('./app.json');
+const easJson = require('./eas.json');
 
-const apiUrl = (process.env.EXPO_PUBLIC_API_URL || '').trim();
-const supabaseUrl = (process.env.EXPO_PUBLIC_SUPABASE_URL || '').trim();
-const supabaseAnonKey = (process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || '').trim();
+// Prefer process.env (EAS injects these). Fall back to eas.json preview.env so
+// APK builds always bake Supabase config even if env injection timing differs.
+const previewEnv = (easJson.build && easJson.build.preview && easJson.build.preview.env) || {};
+
+function readPublic(name) {
+  const fromEnv = (process.env[name] || '').trim();
+  if (fromEnv) return fromEnv;
+  return String(previewEnv[name] || '').trim();
+}
+
+const apiUrl = readPublic('EXPO_PUBLIC_API_URL');
+const supabaseUrl = readPublic('EXPO_PUBLIC_SUPABASE_URL');
+const supabaseAnonKey = readPublic('EXPO_PUBLIC_SUPABASE_ANON_KEY');
 const allowCleartext =
-  process.env.EXPO_PUBLIC_ALLOW_CLEARTEXT === 'true' ||
+  readPublic('EXPO_PUBLIC_ALLOW_CLEARTEXT') === 'true' ||
   apiUrl.startsWith('http://');
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.warn(
+    '[HIRAYA] Missing Supabase public config. Login/register will fail in this build.',
+  );
+}
 
 module.exports = {
   expo: {
     ...appJson.expo,
     android: {
       ...appJson.expo.android,
-      // Needed only when ML API uses http:// (LAN). Prefer https:// for public release.
       usesCleartextTraffic: allowCleartext,
     },
     ios: {
@@ -24,8 +40,6 @@ module.exports = {
           : { NSAllowsLocalNetworking: false },
       },
     },
-    // Bake public config into the binary so APK auth works even if Metro
-    // process.env inlining is incomplete.
     extra: {
       ...(appJson.expo.extra || {}),
       supabaseUrl,

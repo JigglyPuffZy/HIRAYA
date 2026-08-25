@@ -115,9 +115,21 @@ export const authService = {
       throw mapSupabaseError(error, 409);
     }
 
+    // Supabase anti-enumeration: existing email may return user with empty identities.
+    if (
+      data.user &&
+      Array.isArray(data.user.identities) &&
+      data.user.identities.length === 0
+    ) {
+      throw mapSupabaseError(
+        { message: 'This email is already registered. Try signing in instead.' },
+        409,
+      );
+    }
+
     if (!data.session) {
       throw new ApiError(
-        'Account created. Confirm your email (inbox/spam), then sign in. Tip: in Supabase → Authentication → Providers → Email, turn OFF “Confirm email” for easier APK testing.',
+        'Account created, but email confirmation is ON. Open Supabase → Authentication → Providers → Email → turn OFF “Confirm email”, then sign in. Or confirm via inbox first.',
         202,
       );
     }
