@@ -2,24 +2,24 @@
   "expo": {
     "name": "HIRAYA",
     "slug": "HIRAYA",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "scheme": "hiraya",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/hiraya-logo.png",
+      "image": "./assets/hiraya-splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#FFFFFF"
     },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.hiraya.app",
-      "buildNumber": "1"
+      "buildNumber": "2"
     },
     "android": {
       "package": "com.hiraya.app",
-      "versionCode": 3,
+      "versionCode": 4,
       "usesCleartextTraffic": false,
       "permissions": [
         "android.permission.INTERNET",
@@ -27,14 +27,12 @@
       ],
       "adaptiveIcon": {
         "backgroundColor": "#FFFFFF",
-        "foregroundImage": "./assets/hiraya-logo.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
+        "foregroundImage": "./assets/hiraya-icon-foreground.png"
       },
       "predictiveBackGestureEnabled": false
     },
     "web": {
-      "favicon": "./assets/hiraya-logo.png",
+      "favicon": "./assets/icon.png",
       "bundler": "metro"
     },
     "plugins": [

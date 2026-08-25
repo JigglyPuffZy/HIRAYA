@@ -69,8 +69,8 @@ export function DashboardHeader({ userName, lastUpdated }: DashboardHeaderProps)
         },
         brandRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, flex: 1, minWidth: 0 },
         logoImage: {
-          width: 148,
-          height: 44,
+          width: 168,
+          height: 102,
         },
         brand: {
           color: colors.primary,

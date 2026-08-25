@@ -9,11 +9,12 @@ interface BrandLogoProps {
   style?: StyleProp<ImageStyle>;
 }
 
+/** Aspect ~1.64 after crop — keep logo readable on phone screens. */
 const SIZE_MAP: Record<BrandLogoSize, { width: number; height: number }> = {
-  sm: { width: 120, height: 40 },
-  md: { width: 180, height: 60 },
-  lg: { width: 240, height: 80 },
-  hero: { width: 280, height: 96 },
+  sm: { width: 148, height: 90 },
+  md: { width: 220, height: 134 },
+  lg: { width: 280, height: 171 },
+  hero: { width: 320, height: 195 },
 };
 
 export function BrandLogo({ size = 'md', style }: BrandLogoProps) {

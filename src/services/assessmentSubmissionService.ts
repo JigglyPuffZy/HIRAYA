@@ -8,7 +8,10 @@ import {
 import { isApiConfigured, isSupabaseConfigured } from '@/config/env';
 import { predictHeatRisk } from '@/api/predictionApi';
 import { STUDY_AREA } from '@/constants/study-area';
-import { ASSESSMENT_ML_TIMEOUT_MS, WEATHER_REFRESH_INTERVAL_MS } from '@/constants/liveRefresh';
+import {
+  ASSESSMENT_ML_TIMEOUT_MS,
+  ASSESSMENT_STEP_MIN_MS,
+} from '@/constants/liveRefresh';
 import { hasAssessmentFieldsConfigured } from '@/constants/assessmentFields';
 import { isBackendQuicklyReachable } from '@/services/backendHealthService';
 import { AssessmentSubmissionError } from '@/types/assessment';
@@ -103,16 +106,15 @@ async function persistAssessmentRecord(
   return localRecord;
 }
 
-async function resolveEnvironmentalForAssessment(): Promise<EnvironmentalSnapshot> {
-  const cached = await environmentalService.getCached();
-
-  if (cached?.weather?.updatedAt) {
-    const cacheAgeMs = Date.now() - new Date(cached.weather.updatedAt).getTime();
-    if (Number.isFinite(cacheAgeMs) && cacheAgeMs >= 0 && cacheAgeMs < WEATHER_REFRESH_INTERVAL_MS) {
-      return cached;
-    }
+async function waitAtLeast(startedAt: number, minMs: number): Promise<void> {
+  const remaining = minMs - (Date.now() - startedAt);
+  if (remaining > 0) {
+    await new Promise((resolve) => setTimeout(resolve, remaining));
   }
+}
 
+/** Manual assess always pulls live weather so risk is real-time. */
+async function resolveEnvironmentalForAssessment(): Promise<EnvironmentalSnapshot> {
   return environmentalService.fetchWithFallback();
 }
 
@@ -199,11 +201,14 @@ export const assessmentSubmissionService = {
     }
 
     onStep?.('fetching_weather');
+    const weatherStartedAt = Date.now();
 
     const [environmental, profileData] = await Promise.all([
       resolveEnvironmentalForAssessment(),
       profileService.getProfileDataForPrediction(userId),
     ]);
+
+    await waitAtLeast(weatherStartedAt, ASSESSMENT_STEP_MIN_MS.fetching_weather);
 
     const weather = snapshotToWeatherData(
       environmental.weather,
@@ -217,6 +222,7 @@ export const assessmentSubmissionService = {
     const submittedAt = new Date().toISOString();
 
     onStep?.('submitting');
+    const submitStartedAt = Date.now();
 
     const treeResult = riskAssessmentService.assess({
       weather: environmental.weather,
@@ -230,6 +236,8 @@ export const assessmentSubmissionService = {
       token,
       profileData,
     );
+
+    await waitAtLeast(submitStartedAt, ASSESSMENT_STEP_MIN_MS.submitting);
 
     const prediction = assessmentToPrediction(treeResult, profileData, mlPrediction);
 

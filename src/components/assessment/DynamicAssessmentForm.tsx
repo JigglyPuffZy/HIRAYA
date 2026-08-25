@@ -35,7 +35,7 @@ interface DynamicAssessmentFormProps {
 const STEP_MESSAGES: Record<AssessmentSubmissionStep, string> = {
   idle: '',
   validating: 'Checking your answers...',
-  fetching_weather: 'Loading weather...',
+  fetching_weather: 'Fetching live weather for Tuguegarao...',
   submitting: 'Calculating your heat risk...',
   complete: 'Done.',
 };

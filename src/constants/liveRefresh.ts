@@ -9,3 +9,9 @@ export const LOCAL_ASSESSMENT_HISTORY_LIMIT = 200;
 
 /** Optional ML backend — short timeout; on-device tree is primary. */
 export const ASSESSMENT_ML_TIMEOUT_MS = 8000;
+
+/** Minimum time each assess step stays visible so loading feels intentional. */
+export const ASSESSMENT_STEP_MIN_MS = {
+  fetching_weather: 1600,
+  submitting: 1800,
+} as const;

@@ -48,6 +48,7 @@ export function useAssessmentSubmission() {
         );
 
         setSubmissionStep('complete');
+        await new Promise((resolve) => setTimeout(resolve, 700));
         return result;
       } catch (error) {
         if (error instanceof AssessmentSubmissionError) {
