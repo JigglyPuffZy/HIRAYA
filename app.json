@@ -2,16 +2,12 @@
   "expo": {
     "name": "HIRAYA",
     "slug": "HIRAYA",
+    "owner": "jigglypuff",
     "version": "1.0.3",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "scheme": "hiraya",
     "userInterfaceStyle": "light",
-    "splash": {
-      "image": "./assets/hiraya-splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#FFFFFF"
-    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.hiraya.app",
@@ -20,7 +16,6 @@
     "android": {
       "package": "com.hiraya.app",
       "versionCode": 5,
-      "usesCleartextTraffic": false,
       "permissions": [
         "android.permission.INTERNET",
         "android.permission.ACCESS_NETWORK_STATE"
@@ -37,8 +32,18 @@
     },
     "plugins": [
       "expo-router",
-      "expo-splash-screen",
-      "expo-asset"
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/hiraya-splash.png",
+          "imageWidth": 280,
+          "resizeMode": "contain",
+          "backgroundColor": "#FFFFFF"
+        }
+      ],
+      "expo-asset",
+      "expo-font",
+      "expo-status-bar"
     ],
     "experiments": {
       "typedRoutes": true

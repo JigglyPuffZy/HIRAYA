@@ -3,6 +3,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/ui/AppText';
 import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
+import { formatRiskLevelTitle } from '@/constants/riskLevels';
 import { BorderRadius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/context/ThemeContext';
 
@@ -26,7 +27,7 @@ export function RiskExplanationSection({
   return (
     <Card style={styles.card}>
       <SectionHeader
-        title={`${riskLevel} Heat Risk`}
+        title={`${formatRiskLevelTitle(riskLevel)} risk`}
         subtitle="Why you received this level"
         icon="information-circle-outline"
       />

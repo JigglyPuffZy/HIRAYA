@@ -13,6 +13,8 @@ export interface NormalizedWeatherData {
   feelsLike: number;
   humidity: number;
   heatIndex: number;
+  /** Estimated shade WBGT (°C); optional on older stored results. */
+  wbgt?: number;
   uvIndex: number;
   windSpeed: number;
   windKph?: number;

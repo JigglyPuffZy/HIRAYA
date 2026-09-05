@@ -1,6 +1,7 @@
 import { env } from '@/config/env';
 import { STUDY_AREA, STUDY_AREA_LABEL } from '@/constants/study-area';
 import { resolveHeatIndexC } from '@/services/environmental/pagasa/heat-index-calculator';
+import { resolveWbgtC } from '@/services/environmental/wbgt-calculator';
 import { CurrentWeatherSnapshot, HeatReading } from '@/types/environmental';
 import { ApiError } from '@/types/api';
 
@@ -29,12 +30,17 @@ function mapOpenWeatherResponse(payload: OpenWeatherResponse): {
     humidity: payload.main.humidity,
     feelsLikeC: payload.main.feels_like,
   });
+  const wbgt = resolveWbgtC({
+    tempC: payload.main.temp,
+    humidity: payload.main.humidity,
+  });
 
   const capturedAt = new Date().toISOString();
   const windKph = Math.round(payload.wind.speed * 3.6 * 10) / 10;
 
   const heatReading: HeatReading = {
     heatIndex,
+    wbgt,
     latitude: STUDY_AREA.latitude,
     longitude: STUDY_AREA.longitude,
     capturedAt,
@@ -47,6 +53,7 @@ function mapOpenWeatherResponse(payload: OpenWeatherResponse): {
     feelsLike: payload.main.feels_like,
     humidity: payload.main.humidity,
     heatIndex,
+    wbgt,
     condition: payload.weather[0]?.main ?? 'Unknown',
     description: payload.weather[0]?.description ?? '',
     windKph,

@@ -8,7 +8,7 @@ import {
   View,
   ViewStyle,
 } from 'react-native';
-import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
+import { BottomTabBarHeightContext } from 'expo-router/js-tabs';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { DecorativeBackground } from '@/components/ui/DecorativeBackground';
 import { useResponsiveLayout } from '@/hooks/useResponsiveLayout';
@@ -41,7 +41,11 @@ export function ScreenContainer({
   onRefresh,
 }: ScreenContainerProps) {
   const insets = useSafeAreaInsets();
-  const tabBarHeight = useContext(BottomTabBarHeightContext) ?? 0;
+  const tabBarHeightRaw = useContext(BottomTabBarHeightContext);
+  const tabBarHeight =
+    typeof tabBarHeightRaw === 'number' && Number.isFinite(tabBarHeightRaw)
+      ? tabBarHeightRaw
+      : 0;
   const { colors } = useTheme();
   const { screenPadding, maxContentWidth } = useResponsiveLayout();
   const bottomPadding = Math.max(insets.bottom, Spacing.xl) + tabBarHeight;

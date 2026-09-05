@@ -3,7 +3,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { AssessmentHistoryItem } from '@/types/assessmentHistory';
 import { AppText } from '@/components/ui/AppText';
 import { Card } from '@/components/ui/Card';
-import { getRiskLevelVisualStyle } from '@/constants/riskLevels';
+import { getRiskLevelVisualStyle, formatRiskLevelBadge, formatRiskLevelLabel } from '@/constants/riskLevels';
 import { BorderRadius, FontSize, Spacing } from '@/constants/theme';
 import { useTheme } from '@/context/ThemeContext';
 import { formatDateTime } from '@/utils/formatters';
@@ -25,7 +25,7 @@ export function AssessmentHistoryCard({
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`Assessment on ${formatDateTime(item.assessedAt)}, risk level ${item.riskLevel}`}
+      accessibilityLabel={`Assessment on ${formatDateTime(item.assessedAt)}, risk level ${formatRiskLevelLabel(item.riskLevel)}`}
       onPress={() => onPress(item)}
       style={({ pressed }) => [pressed && styles.pressed]}
     >
@@ -44,7 +44,7 @@ export function AssessmentHistoryCard({
               ) : null}
               {item.source === 'live_refresh' ? (
                 <AppText variant="caption" style={{ color: colors.primary, fontWeight: '600' }}>
-                  Auto refresh
+                  Auto-refresh
                 </AppText>
               ) : null}
               {item.source === 'user_refresh' ? (
@@ -60,7 +60,7 @@ export function AssessmentHistoryCard({
             </View>
             <View style={[styles.badge, { backgroundColor: visual.accentColor }]}>
               <AppText variant="caption" style={[styles.badgeText, { color: colors.onPrimary }]} numberOfLines={1}>
-                {item.riskLevel}
+                {formatRiskLevelBadge(item.riskLevel)}
               </AppText>
             </View>
           </View>

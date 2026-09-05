@@ -13,6 +13,7 @@ import {
   formatPercent,
   formatTemperature,
 } from '@/utils/formatters';
+import { formatPagasaHeatIndexSubtitle } from '@/config/risk-assessment.config';
 
 interface WeatherCardProps {
   weather: WeatherData;
@@ -134,13 +135,14 @@ export function WeatherCard({ weather, isRefreshing = false }: WeatherCardProps)
 
         <View style={styles.metrics}>
           <Metric label="Humidity" value={formatPercent(weather.humidity)} icon="water" styles={styles} color={colors.primary} />
-          <Metric label="Wind" value={`${Math.round(weather.windKph)} km/h`} icon="flag" styles={styles} color={colors.primary} />
-          <Metric label="Feels like" value={formatTemperature(weather.feelsLike)} icon="thermometer" styles={styles} color={colors.primary} />
+          <Metric label="Heat index" value={formatTemperature(weather.heatIndex)} icon="thermometer" styles={styles} color={colors.primary} />
+          <Metric label="WBGT" value={formatTemperature(weather.wbgt)} icon="sunny" styles={styles} color={colors.primary} />
         </View>
 
         <AppText variant="caption" muted style={styles.updated}>
-          Updated {formatRelativeTime(weather.updatedAt)}
-        </AppText>
+              PAGASA {formatPagasaHeatIndexSubtitle(weather.heatIndex)} · WBGT est. · Updated{' '}
+              {formatRelativeTime(weather.updatedAt)}
+            </AppText>
       </View>
     </GradientSurface>
       {isRefreshing ? (

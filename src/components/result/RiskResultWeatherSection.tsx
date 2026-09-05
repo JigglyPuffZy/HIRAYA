@@ -13,6 +13,8 @@ import {
   formatPercent,
   formatTemperature,
 } from '@/utils/formatters';
+import { formatPagasaHeatIndexSubtitle } from '@/config/risk-assessment.config';
+import { estimateWbgtC } from '@/services/environmental/wbgt-calculator';
 
 interface RiskResultWeatherSectionProps {
   weather: NormalizedWeatherData;
@@ -30,6 +32,10 @@ export function RiskResultWeatherSection({
   weather,
 }: RiskResultWeatherSectionProps) {
   const { colors } = useTheme();
+  const wbgt =
+    typeof weather.wbgt === 'number' && Number.isFinite(weather.wbgt)
+      ? weather.wbgt
+      : estimateWbgtC(weather.temperature, weather.humidity);
 
   const styles = useMemo(
     () =>
@@ -126,8 +132,15 @@ export function RiskResultWeatherSection({
       <View style={styles.metricsRow}>
         <Metric
           icon="thermometer"
-          label="Feels like"
-          value={formatTemperature(weather.feelsLike)}
+          label="Heat index"
+          value={formatTemperature(weather.heatIndex)}
+          styles={styles}
+          color={colors.primary}
+        />
+        <Metric
+          icon="sunny"
+          label="WBGT"
+          value={formatTemperature(wbgt)}
           styles={styles}
           color={colors.primary}
         />
@@ -138,14 +151,11 @@ export function RiskResultWeatherSection({
           styles={styles}
           color={colors.primary}
         />
-        <Metric
-          icon="flag"
-          label="Wind"
-          value={`${Math.round(Number(weather.windKph ?? weather.windSpeed))} km/h`}
-          styles={styles}
-          color={colors.primary}
-        />
       </View>
+
+      <AppText variant="caption" muted>
+        PAGASA {formatPagasaHeatIndexSubtitle(weather.heatIndex)} · WBGT est.
+      </AppText>
 
       {weather.uvIndex > 0 ? (
         <View style={styles.uvRow}>

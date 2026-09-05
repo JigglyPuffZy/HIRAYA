@@ -1,11 +1,11 @@
 import { useState } from 'react';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Link, useRouter } from 'expo-router';
 import { AuthScreenLayout } from '@/components/auth/AuthScreenLayout';
 import { AuthHeader } from '@/components/auth/AuthHeader';
 import { AuthInput } from '@/components/auth/AuthInput';
 import { AuthButton } from '@/components/auth/AuthButton';
-import { Card } from '@/components/ui/Card';
 import { ErrorMessage } from '@/components/ui/ErrorMessage';
 import { AppText } from '@/components/ui/AppText';
 import { useAuth } from '@/hooks/useAuth';
@@ -17,11 +17,11 @@ import {
   isValidPassword,
   validateRequired,
 } from '@/utils/validation';
-import { Spacing } from '@/constants/theme';
+import { BorderRadius, Spacing } from '@/constants/theme';
 
 export default function RegisterScreen() {
   const router = useRouter();
-  const { colors } = useTheme();
+  const { colors, isDark, shadows } = useTheme();
   const { register, error, clearError } = useAuth();
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
@@ -61,7 +61,7 @@ export default function RegisterScreen() {
       });
       router.replace(await resolvePostAuthRoute(session.user.id));
     } catch {
-      // Error (including email-confirm instructions) shown via auth context.
+      // Error shown via auth context.
     } finally {
       setIsSubmitting(false);
     }
@@ -71,13 +71,28 @@ export default function RegisterScreen() {
     <AuthScreenLayout>
       <AuthHeader
         title="Create account"
-        subtitle="Join HIRAYA to monitor heat stroke risk in real time."
+        subtitle="Join HIRAYA to monitor heat risk in real time."
       />
 
-      <Card variant="elevated" style={styles.formCard}>
+      <View
+        style={[
+          styles.formCard,
+          shadows.card,
+          {
+            backgroundColor: isDark ? 'rgba(21, 31, 50, 0.92)' : colors.surface,
+            borderColor: isDark ? 'rgba(255,255,255,0.06)' : colors.borderLight,
+          },
+        ]}
+      >
+        <LinearGradient
+          colors={[colors.primaryLight, colors.primary]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={styles.formAccent}
+        />
         <View style={styles.form}>
           <AuthInput
-            label="Full Name"
+            label="Full name"
             value={fullName}
             onChangeText={setFullName}
             autoComplete="name"
@@ -107,44 +122,31 @@ export default function RegisterScreen() {
           {error ? <ErrorMessage message={error} /> : null}
 
           <AppText variant="caption" muted style={styles.hint}>
-            Use a real email and password (8+ characters). If create account says
-            “confirm email”, open Supabase → Authentication → Providers → Email and
-            turn OFF Confirm email, then try again.
+            Use a valid email and a password with at least 8 characters.
           </AppText>
 
           <AuthButton
-            title="Create Account"
+            title="Create account"
             onPress={handleRegister}
             loading={isSubmitting}
             fullWidth
           />
         </View>
-      </Card>
+      </View>
 
       <View style={styles.footer}>
         <AppText variant="body" muted>
           Already have an account?
         </AppText>
         <Link href={ROUTES.LOGIN} asChild>
-          <Pressable accessibilityRole="button" style={({ pressed }) => pressed && styles.pressed}>
+          <Pressable
+            accessibilityRole="button"
+            style={({ pressed }) => pressed && styles.pressed}
+          >
             <AppText style={[styles.link, { color: colors.primary }]}>Sign in</AppText>
           </Pressable>
         </Link>
       </View>
-
-      <AuthButton
-        title="Back to Login"
-        variant="outline"
-        onPress={() => {
-          if (router.canGoBack()) {
-            router.back();
-            return;
-          }
-
-          router.replace(ROUTES.LOGIN);
-        }}
-        fullWidth
-      />
     </AuthScreenLayout>
   );
 }
@@ -152,6 +154,16 @@ export default function RegisterScreen() {
 const styles = StyleSheet.create({
   formCard: {
     width: '100%',
+    borderRadius: BorderRadius.xxl,
+    borderWidth: 1,
+    padding: Spacing.lg,
+    overflow: 'hidden',
+  },
+  formAccent: {
+    height: 3,
+    width: '100%',
+    marginBottom: Spacing.md,
+    borderRadius: 2,
   },
   form: {
     gap: Spacing.md,

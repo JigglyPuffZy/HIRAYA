@@ -9,7 +9,7 @@ import {
   SafetyRecommendationSection,
   StructuredSafetyRecommendations,
 } from '@/types/riskAssessment';
-import { RiskLevelCategory } from '@/constants/riskLevels';
+import { RiskLevelCategory, formatRiskLevelTitle } from '@/constants/riskLevels';
 import { combinedConditionKey, parseHealthConditions } from '@/utils/healthConditions';
 import { AssessmentInputData } from '@/types/prediction';
 
@@ -85,7 +85,7 @@ export function buildStructuredSafetyRecommendations(input: {
 
   sections.push({
     id: 'risk_summary',
-    title: `${assessment.level} Heat Risk — What This Means`,
+    title: `${formatRiskLevelTitle(assessment.level)} heat risk — what this means`,
     tips: [
       levelIntro(assessment.level),
       assessment.recommendedAction,

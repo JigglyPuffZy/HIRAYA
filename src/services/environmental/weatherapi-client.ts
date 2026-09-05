@@ -6,6 +6,7 @@ import {
   WEATHERAPI_LOCATION_QUERIES,
 } from '@/constants/study-area';
 import { resolveHeatIndexC } from '@/services/environmental/pagasa/heat-index-calculator';
+import { resolveWbgtC } from '@/services/environmental/wbgt-calculator';
 import { CurrentWeatherSnapshot, HeatReading } from '@/types/environmental';
 import { ApiError } from '@/types/api';
 
@@ -45,6 +46,10 @@ function mapResponse(payload: WeatherApiCurrentResponse): {
     heatIndexC: current.heatindex_c,
     feelsLikeC: current.feelslike_c,
   });
+  const wbgt = resolveWbgtC({
+    tempC: current.temp_c,
+    humidity: current.humidity,
+  });
 
   const capturedAt = new Date().toISOString();
   const apiLocation = payload.location.name
@@ -53,6 +58,7 @@ function mapResponse(payload: WeatherApiCurrentResponse): {
 
   const heatReading: HeatReading = {
     heatIndex,
+    wbgt,
     latitude: STUDY_AREA.latitude,
     longitude: STUDY_AREA.longitude,
     capturedAt,
@@ -65,6 +71,7 @@ function mapResponse(payload: WeatherApiCurrentResponse): {
     feelsLike: current.feelslike_c,
     humidity: current.humidity,
     heatIndex,
+    wbgt,
     condition: current.condition.text,
     description: current.condition.text,
     windKph: current.wind_kph,

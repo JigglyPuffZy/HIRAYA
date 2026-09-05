@@ -67,6 +67,7 @@ export interface EnvironmentalData {
   feelsLike: number;
   humidity: number;
   heatIndex: number;
+  wbgt: number;
   uvIndex: number;
   windSpeed: number;
   windKph: number;

@@ -17,7 +17,7 @@ export function AssessmentHistoryEmptyState() {
       </View>
       <AppText variant="subtitle">No assessments yet</AppText>
       <AppText variant="body" muted style={styles.body}>
-        Live dashboard refreshes add a history entry only when temperature or risk level changes. Completed check-ins are always saved.
+        Check-ins are always saved. Auto-refreshes appear when temperature or risk changes.
       </AppText>
     </Card>
   );

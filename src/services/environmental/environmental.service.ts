@@ -2,6 +2,7 @@ import { STORAGE_KEYS } from '@/constants/storageKeys';
 import { fetchOpenMeteoCurrent } from '@/services/environmental/open-meteo-client';
 import { fetchOpenWeatherCurrent } from '@/services/environmental/openweather-client';
 import { fetchWeatherApiCurrent } from '@/services/environmental/weatherapi-client';
+import { resolveWbgtC } from '@/services/environmental/wbgt-calculator';
 import { storageService } from '@/services/storageService';
 import {
   getActiveWeatherProvider,
@@ -19,6 +20,22 @@ interface CachedEnvironmentalPayload {
   weather: CurrentWeatherSnapshot;
 }
 
+function withResolvedWbgt(
+  weather: CurrentWeatherSnapshot,
+  heatReading: HeatReading,
+): { weather: CurrentWeatherSnapshot; heatReading: HeatReading } {
+  const wbgt = resolveWbgtC({
+    tempC: weather.temperature,
+    humidity: weather.humidity,
+    wbgtC: weather.wbgt,
+  });
+
+  return {
+    weather: { ...weather, wbgt },
+    heatReading: { ...heatReading, wbgt },
+  };
+}
+
 function validateSnapshot(
   payload: CachedEnvironmentalPayload | null,
 ): EnvironmentalSnapshot | null {
@@ -26,9 +43,11 @@ function validateSnapshot(
     return null;
   }
 
+  const resolved = withResolvedWbgt(payload.weather, payload.heatReading);
+
   return {
-    heatReading: { ...payload.heatReading, status: 'cached' },
-    weather: payload.weather,
+    heatReading: { ...resolved.heatReading, status: 'cached' },
+    weather: resolved.weather,
     source: 'cached',
   };
 }

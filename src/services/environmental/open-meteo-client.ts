@@ -5,6 +5,7 @@ import {
   STUDY_AREA_LABEL,
 } from '@/constants/study-area';
 import { resolveHeatIndexC } from '@/services/environmental/pagasa/heat-index-calculator';
+import { resolveWbgtC } from '@/services/environmental/wbgt-calculator';
 import { CurrentWeatherSnapshot, HeatReading } from '@/types/environmental';
 import { ApiError } from '@/types/api';
 
@@ -91,11 +92,16 @@ function mapOpenMeteoResponse(payload: OpenMeteoForecastResponse): {
     humidity: current.relative_humidity_2m,
     feelsLikeC: current.apparent_temperature,
   });
+  const wbgt = resolveWbgtC({
+    tempC: current.temperature_2m,
+    humidity: current.relative_humidity_2m,
+  });
 
   const capturedAt = new Date().toISOString();
 
   const heatReading: HeatReading = {
     heatIndex,
+    wbgt,
     latitude: STUDY_AREA.latitude,
     longitude: STUDY_AREA.longitude,
     capturedAt,
@@ -108,6 +114,7 @@ function mapOpenMeteoResponse(payload: OpenMeteoForecastResponse): {
     feelsLike: current.apparent_temperature,
     humidity: current.relative_humidity_2m,
     heatIndex,
+    wbgt,
     condition,
     description: condition.toLowerCase(),
     windKph: current.wind_speed_10m,

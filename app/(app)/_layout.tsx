@@ -1,5 +1,5 @@
 import { ComponentProps } from 'react';
-import { Platform, StyleSheet } from 'react-native';
+import { ColorValue, Platform, StyleSheet } from 'react-native';
 import { Redirect, Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { ScreenContainer } from '@/components/layout/ScreenContainer';
@@ -30,7 +30,7 @@ function TabBarIcon({
 }: {
   icons: TabIconConfig;
   focused: boolean;
-  color: string;
+  color: ColorValue;
 }) {
   return (
     <Ionicons

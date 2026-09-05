@@ -12,7 +12,7 @@ import {
   VULNERABILITY_POINTS,
 } from '@/config/risk-assessment.config';
 import { VulnerabilityInput, HeatRiskAssessmentResult } from '@/types/riskAssessment';
-import { RiskLevelCategory } from '@/constants/riskLevels';
+import { RiskLevelCategory, formatRiskLevelPhrase } from '@/constants/riskLevels';
 import { parseHealthConditions } from '@/utils/healthConditions';
 
 function normalizeActivity(value?: string): 'low' | 'moderate' | 'high' | null {
@@ -194,16 +194,10 @@ function resolvePersonalEscalationSteps(
 
 function applyHumidityBump(
   level: RiskLevelCategory,
-  humidity: number,
+  _humidity: number,
 ): RiskLevelCategory {
-  if (humidity >= HUMIDITY_BUMP_THRESHOLD && level === 'LOW') {
-    return 'MODERATE';
-  }
-
-  if (humidity >= HUMIDITY_BUMP_THRESHOLD && level === 'MODERATE') {
-    return 'HIGH';
-  }
-
+  // Heat index already embeds relative humidity (PAGASA / NOAA formula).
+  // Do not escalate the official HI band a second time from RH alone.
   return level;
 }
 
@@ -332,12 +326,14 @@ function buildRiskExplanation(
   environmentalLevel: RiskLevelCategory,
   factors: string[],
 ): string {
-  const envLabel = environmentalLevel.toLowerCase();
+  const envPhrase = formatRiskLevelPhrase(environmentalLevel);
+  const levelPhrase = formatRiskLevelPhrase(level);
+
   if (factors.length === 0) {
-    return `Current heat index indicates ${envLabel} environmental exposure with no additional personal risk factors identified.`;
+    return `Current heat index indicates ${envPhrase} environmental exposure with no additional personal risk factors identified.`;
   }
 
-  return `Your ${level.toLowerCase()} heat risk reflects ${envLabel} environmental conditions combined with your personal vulnerability factors.`;
+  return `Your ${levelPhrase} heat risk reflects ${envPhrase} environmental conditions combined with your personal vulnerability factors.`;
 }
 
 export function assessHeatRisk(input: {

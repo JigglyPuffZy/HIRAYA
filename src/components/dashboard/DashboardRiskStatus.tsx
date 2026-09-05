@@ -89,7 +89,7 @@ export function DashboardRiskStatus({
   return (
     <View accessibilityLabel="Heat-related risk status section">
       <SectionHeader
-        title="Your Heat Risk"
+        title="Your heat risk"
         subtitle={
           isRefreshing
             ? 'Updating with latest weather...'
@@ -143,9 +143,9 @@ export function DashboardRiskStatus({
 
                   <AppText
                     style={[dynamicStyles.riskLevelWord, { color: visual.textColor }]}
-                    numberOfLines={1}
+                    numberOfLines={2}
                     adjustsFontSizeToFit
-                    minimumFontScale={0.75}
+                    minimumFontScale={0.65}
                   >
                     {levelTitle}
                   </AppText>
@@ -153,7 +153,7 @@ export function DashboardRiskStatus({
                     variant="caption"
                     style={[styles.riskLevelSuffix, { color: visual.textColor }]}
                   >
-                    Heat Risk
+                    Heat risk
                   </AppText>
 
                   {assessedAt ? (
@@ -184,7 +184,7 @@ export function DashboardRiskStatus({
                       variant="caption"
                       style={[styles.scoreLabel, { color: visual.textColor, opacity: 0.8 }]}
                     >
-                      score
+                      Score
                     </AppText>
                   </View>
                 ) : null}

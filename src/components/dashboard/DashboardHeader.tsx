@@ -1,17 +1,16 @@
 import { useMemo } from 'react';
 import { Ionicons } from '@expo/vector-icons';
-import { Image, Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { AppText } from '@/components/ui/AppText';
+import { BrandLogo } from '@/components/ui/BrandLogo';
 import { GradientSurface } from '@/components/ui/GradientSurface';
 import { ROUTES } from '@/constants/routes';
 import { STUDY_AREA_LABEL } from '@/constants/study-area';
 import { formatRelativeTime } from '@/utils/formatters';
-import { FontSize, Spacing, BorderRadius, getTimeBasedGreeting } from '@/constants/theme';
+import { Spacing, BorderRadius, getTimeBasedGreeting } from '@/constants/theme';
 import { useResponsiveLayout } from '@/hooks/useResponsiveLayout';
 import { useTheme } from '@/context/ThemeContext';
-
-const LOGO = require('../../../assets/hiraya-logo.png');
 
 interface DashboardHeaderProps {
   userName?: string;
@@ -67,18 +66,7 @@ export function DashboardHeader({ userName, lastUpdated }: DashboardHeaderProps)
           alignItems: 'center',
           justifyContent: 'space-between',
         },
-        brandRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, flex: 1, minWidth: 0 },
-        logoImage: {
-          width: 168,
-          height: 102,
-        },
-        brand: {
-          color: colors.primary,
-          letterSpacing: 1.4,
-          fontSize: FontSize.sm,
-          fontWeight: '800',
-        },
-        tagline: { color: colors.textMuted, fontSize: 11, marginTop: 1 },
+        brandRow: { flexDirection: 'row', alignItems: 'center', flex: 1, minWidth: 0 },
         profileButton: { borderRadius: BorderRadius.full },
         pressed: { opacity: 0.85 },
         avatarRing: {
@@ -160,12 +148,7 @@ export function DashboardHeader({ userName, lastUpdated }: DashboardHeaderProps)
         <View style={styles.heroInner}>
           <View style={styles.heroTop}>
             <View style={styles.brandRow}>
-              <Image
-                source={LOGO}
-                accessibilityLabel="HIRAYA logo"
-                resizeMode="contain"
-                style={styles.logoImage}
-              />
+              <BrandLogo size="sm" />
             </View>
 
             <Pressable

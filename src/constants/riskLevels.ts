@@ -1,7 +1,7 @@
 /**
- * Visual styling for risk level categories.
- * These are display-only states — no medical meaning or thresholds are defined here.
- * Approved category definitions will come from the research methodology.
+ * Visual styling and display labels for risk levels.
+ * Environmental bands follow PAGASA heat-index classifications
+ * (Caution / Extreme Caution / Danger / Extreme Danger).
  */
 export type RiskLevelCategory =
   | 'LOW'
@@ -78,8 +78,16 @@ export function resolveRiskLevelCategory(
     return 'MODERATE';
   }
 
-  if (normalized.includes('LOW') || normalized.includes('MINIMAL')) {
+  if (normalized.includes('LOW') || normalized.includes('MINIMAL') || normalized.includes('NORMAL')) {
     return 'LOW';
+  }
+
+  if (normalized.includes('CAUTION') && !normalized.includes('EXTREME')) {
+    return 'MODERATE';
+  }
+
+  if (normalized.includes('DANGER')) {
+    return 'EXTREME';
   }
 
   return 'UNKNOWN';
@@ -92,28 +100,29 @@ export function getRiskLevelVisualStyle(
   return RISK_LEVEL_VISUALS[category];
 }
 
+/** Full label for banners and explanations (Title Case). */
 const RISK_LEVEL_LABELS: Record<RiskLevelCategory, string> = {
-  LOW: 'Low Risk',
-  MODERATE: 'Moderate Risk',
-  HIGH: 'High Risk',
-  EXTREME: 'Extreme Risk',
+  LOW: 'Normal',
+  MODERATE: 'Caution',
+  HIGH: 'Extreme Caution',
+  EXTREME: 'Danger',
   UNKNOWN: 'Unknown',
 };
 
-/** Short headline word for compact UI (dashboard cards). */
-const RISK_LEVEL_TITLES: Record<RiskLevelCategory, string> = {
-  LOW: 'Low',
-  MODERATE: 'Moderate',
-  HIGH: 'High',
-  EXTREME: 'Extreme',
+/** Compact badge text that fits narrow history chips. */
+const RISK_LEVEL_BADGES: Record<RiskLevelCategory, string> = {
+  LOW: 'Normal',
+  MODERATE: 'Caution',
+  HIGH: 'Ext. Caution',
+  EXTREME: 'Danger',
   UNKNOWN: 'Unknown',
 };
 
 const RISK_LEVEL_SUMMARIES: Record<RiskLevelCategory, string> = {
-  LOW: 'Conditions look manageable — stay hydrated and take normal precautions.',
-  MODERATE: 'Take breaks in the shade and drink water regularly.',
-  HIGH: 'Limit outdoor activity and cool down often.',
-  EXTREME: 'Avoid prolonged heat exposure and seek cooler shelter immediately.',
+  LOW: 'Below the PAGASA caution range. Stay hydrated as usual.',
+  MODERATE: 'PAGASA Caution (27-32 C). Rest in shade and drink water often.',
+  HIGH: 'PAGASA Extreme Caution (33-41 C). Limit outdoor activity and cool down often.',
+  EXTREME: 'PAGASA Danger (42 C+). Avoid prolonged heat and seek cooler shelter.',
   UNKNOWN: 'Complete an assessment to see your personalized risk level.',
 };
 
@@ -122,9 +131,18 @@ export function formatRiskLevelLabel(riskLevel: string): string {
 }
 
 export function formatRiskLevelTitle(riskLevel: string): string {
-  return RISK_LEVEL_TITLES[resolveRiskLevelCategory(riskLevel)];
+  return RISK_LEVEL_LABELS[resolveRiskLevelCategory(riskLevel)];
+}
+
+export function formatRiskLevelBadge(riskLevel: string): string {
+  return RISK_LEVEL_BADGES[resolveRiskLevelCategory(riskLevel)];
 }
 
 export function formatRiskLevelSummary(riskLevel: string): string {
   return RISK_LEVEL_SUMMARIES[resolveRiskLevelCategory(riskLevel)];
+}
+
+/** Friendly phrase for sentences (e.g. "extreme caution"). */
+export function formatRiskLevelPhrase(riskLevel: string): string {
+  return formatRiskLevelLabel(riskLevel).toLowerCase();
 }

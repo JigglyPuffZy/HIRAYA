@@ -14,19 +14,30 @@ interface AuthInputProps extends TextInputProps {
 }
 
 export function AuthInput({ label, error, style, ...props }: AuthInputProps) {
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
 
   return (
     <View style={styles.container}>
-      <Text style={[styles.label, { color: colors.text }]}>{label}</Text>
+      <Text
+        style={[
+          styles.label,
+          { color: isDark ? 'rgba(248,250,252,0.85)' : colors.textSecondary },
+        ]}
+      >
+        {label}
+      </Text>
       <TextInput
-        placeholderTextColor={colors.textMuted}
+        placeholderTextColor={isDark ? 'rgba(148,163,184,0.65)' : colors.textMuted}
         style={[
           styles.input,
           {
-            borderColor: error ? colors.error : colors.border,
+            borderColor: error
+              ? colors.error
+              : isDark
+                ? 'rgba(255,255,255,0.1)'
+                : colors.border,
             color: colors.text,
-            backgroundColor: colors.inputBackground,
+            backgroundColor: isDark ? 'rgba(8,12,22,0.88)' : colors.inputBackground,
           },
           error ? styles.inputError : null,
           style,
@@ -40,19 +51,21 @@ export function AuthInput({ label, error, style, ...props }: AuthInputProps) {
 
 const styles = StyleSheet.create({
   container: {
-    gap: Spacing.xs,
+    gap: 6,
   },
   label: {
     fontSize: FontSize.sm,
     fontWeight: '600',
+    letterSpacing: 0.15,
+    marginLeft: 2,
   },
   input: {
     borderWidth: 1,
-    borderRadius: BorderRadius.lg,
+    borderRadius: BorderRadius.xl,
     paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.md,
+    paddingVertical: 15,
     fontSize: FontSize.md,
-    minHeight: 52,
+    minHeight: 54,
   },
   inputError: {
     borderWidth: 1.5,
@@ -60,5 +73,6 @@ const styles = StyleSheet.create({
   error: {
     fontSize: FontSize.sm,
     fontWeight: '500',
+    marginLeft: 2,
   },
 });

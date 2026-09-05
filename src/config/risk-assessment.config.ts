@@ -1,14 +1,15 @@
 /**
- * PAGASA heat-index bands (°C) mapped to app risk levels.
+ * PAGASA heat-index classifications (°C), adapted from NOAA NWS
+ * (as used by DOST-PAGASA / local DRRM advisories):
  *
- * Official 4-tier effect-based classification (PAGASA / DOH):
  * - Caution: 27–32°C
  * - Extreme caution: 33–41°C
  * - Danger: 42–51°C
  * - Extreme danger: ≥52°C
  *
- * @see https://www.gmanetwork.com/news/weather/content/981464/
- * @see https://newsinfo.inquirer.net/1929567/pagasa-on-heat-index-monitoring-system
+ * App risk levels map 1:1 onto those bands (plus below-caution → LOW).
+ * Heat index already includes humidity, so environmental bands are not
+ * bumped again by RH alone.
  */
 import { RiskLevelCategory } from '@/constants/riskLevels';
 
@@ -27,30 +28,38 @@ export const PAGASA_HEAT_INDEX_BANDS: PagasaBand[] = [
     maxExclusive: 27,
     level: 'LOW',
     label: 'Normal',
-    pagasaLabel: 'Below caution',
+    pagasaLabel: 'Below caution (<27 C)',
   },
   {
     minInclusive: 27,
     maxExclusive: 33,
     level: 'MODERATE',
     label: 'Caution',
-    pagasaLabel: 'Caution (27–32°C)',
+    pagasaLabel: 'Caution (27-32 C)',
   },
   {
     minInclusive: 33,
     maxExclusive: 42,
     level: 'HIGH',
-    label: 'Extreme caution',
-    pagasaLabel: 'Extreme caution (33–41°C)',
+    label: 'Extreme Caution',
+    pagasaLabel: 'Extreme Caution (33-41 C)',
   },
   {
     minInclusive: 42,
+    maxExclusive: 52,
     level: 'EXTREME',
     label: 'Danger',
-    pagasaLabel: 'Danger (42°C and above)',
+    pagasaLabel: 'Danger (42-51 C)',
+  },
+  {
+    minInclusive: 52,
+    level: 'EXTREME',
+    label: 'Extreme Danger',
+    pagasaLabel: 'Extreme Danger (52 C+)',
   },
 ];
 
+/** @deprecated Heat index already includes RH; kept for factor messaging only. */
 export const HUMIDITY_BUMP_THRESHOLD = 70;
 
 export const VULNERABILITY_POINTS = {
@@ -87,11 +96,13 @@ export function environmentalLevelFromHeatIndex(
 }
 
 export function getPagasaBandForHeatIndex(heatIndexC: number): PagasaBand {
+  const value = Number.isFinite(heatIndexC) ? heatIndexC : 0;
+
   for (const band of PAGASA_HEAT_INDEX_BANDS) {
     const aboveMin =
-      band.minInclusive === undefined || heatIndexC >= band.minInclusive;
+      band.minInclusive === undefined || value >= band.minInclusive;
     const belowMax =
-      band.maxExclusive === undefined || heatIndexC < band.maxExclusive;
+      band.maxExclusive === undefined || value < band.maxExclusive;
 
     if (aboveMin && belowMax) {
       return band;
@@ -99,6 +110,14 @@ export function getPagasaBandForHeatIndex(heatIndexC: number): PagasaBand {
   }
 
   return PAGASA_HEAT_INDEX_BANDS[PAGASA_HEAT_INDEX_BANDS.length - 1];
+}
+
+export function formatPagasaHeatIndexTitle(heatIndexC: number): string {
+  return getPagasaBandForHeatIndex(heatIndexC).label;
+}
+
+export function formatPagasaHeatIndexSubtitle(heatIndexC: number): string {
+  return getPagasaBandForHeatIndex(heatIndexC).pagasaLabel;
 }
 
 export function escalateLevel(

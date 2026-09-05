@@ -1,4 +1,3 @@
-const appJson = require('./app.json');
 const easJson = require('./eas.json');
 
 // Prefer process.env (EAS injects these). Fall back to eas.json preview.env so
@@ -24,28 +23,37 @@ if (!supabaseUrl || !supabaseAnonKey) {
   );
 }
 
-module.exports = {
-  expo: {
-    ...appJson.expo,
-    android: {
-      ...appJson.expo.android,
-      usesCleartextTraffic: allowCleartext,
+/** @param {{ config: Record<string, any> }} ctx */
+module.exports = ({ config }) => {
+  const plugins = [...(config.plugins || [])];
+
+  plugins.push([
+    'expo-build-properties',
+    {
+      android: {
+        usesCleartextTraffic: allowCleartext,
+      },
     },
+  ]);
+
+  return {
+    ...config,
+    plugins,
     ios: {
-      ...appJson.expo.ios,
+      ...(config.ios || {}),
       infoPlist: {
-        ...(appJson.expo.ios.infoPlist || {}),
+        ...((config.ios && config.ios.infoPlist) || {}),
         NSAppTransportSecurity: allowCleartext
           ? { NSAllowsLocalNetworking: true, NSAllowsArbitraryLoads: true }
           : { NSAllowsLocalNetworking: false },
       },
     },
     extra: {
-      ...(appJson.expo.extra || {}),
+      ...(config.extra || {}),
       supabaseUrl,
       supabaseAnonKey,
       apiUrl,
       allowCleartext,
     },
-  },
+  };
 };

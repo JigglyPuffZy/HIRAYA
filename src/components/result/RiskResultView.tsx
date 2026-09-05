@@ -22,6 +22,7 @@ export function RiskResultView({ payload }: RiskResultViewProps) {
         riskLevel={prediction.riskLevel}
         score={prediction.prediction}
         assessedAt={submittedAt}
+        heatIndexC={weather.heatIndex}
       />
 
       <RiskExplanationSection

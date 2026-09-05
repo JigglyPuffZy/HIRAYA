@@ -5,6 +5,7 @@ import {
   formatRiskLevelSummary,
   getRiskLevelVisualStyle,
 } from '@/constants/riskLevels';
+import { formatPagasaHeatIndexSubtitle } from '@/config/risk-assessment.config';
 import { AppText } from '@/components/ui/AppText';
 import { BorderRadius, FontSize, Spacing } from '@/constants/theme';
 import { useTheme } from '@/context/ThemeContext';
@@ -14,17 +15,23 @@ interface RiskLevelBannerProps {
   riskLevel: string;
   score?: number;
   assessedAt?: string;
+  heatIndexC?: number;
 }
 
 export function RiskLevelBanner({
   riskLevel,
   score,
   assessedAt,
+  heatIndexC,
 }: RiskLevelBannerProps) {
   const { colors, shadows } = useTheme();
   const visual = getRiskLevelVisualStyle(riskLevel);
   const label = formatRiskLevelTitle(riskLevel);
   const summary = formatRiskLevelSummary(riskLevel);
+  const pagasaBand =
+    typeof heatIndexC === 'number' && Number.isFinite(heatIndexC)
+      ? formatPagasaHeatIndexSubtitle(heatIndexC)
+      : null;
   const showScore = typeof score === 'number' && Number.isFinite(score);
 
   return (
@@ -54,9 +61,9 @@ export function RiskLevelBanner({
           <AppText
             style={[styles.level, { color: visual.textColor }]}
             accessibilityRole="header"
-            numberOfLines={1}
+            numberOfLines={2}
             adjustsFontSizeToFit
-            minimumFontScale={0.7}
+            minimumFontScale={0.65}
           >
             {label}
           </AppText>
@@ -64,12 +71,18 @@ export function RiskLevelBanner({
             variant="caption"
             style={[styles.levelSuffix, { color: visual.textColor }]}
           >
-            Heat Risk
+            Heat risk
           </AppText>
 
           <AppText variant="body" style={[styles.summary, { color: visual.textColor }]}>
             {summary}
           </AppText>
+
+          {pagasaBand ? (
+            <AppText variant="caption" style={[styles.timestamp, { color: visual.textColor }]}>
+              PAGASA heat index: {pagasaBand}
+            </AppText>
+          ) : null}
 
           {assessedAt ? (
             <AppText variant="caption" style={[styles.timestamp, { color: visual.textColor }]}>
@@ -92,7 +105,7 @@ export function RiskLevelBanner({
               {Math.round(score!)}
             </AppText>
             <AppText variant="caption" style={[styles.scoreLabel, { color: visual.textColor }]}>
-              score
+              Score
             </AppText>
           </View>
         ) : null}

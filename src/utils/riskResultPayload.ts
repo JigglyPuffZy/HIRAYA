@@ -25,6 +25,7 @@ const isNormalizedWeatherData = (value: unknown): value is NormalizedWeatherData
     (typeof value.heatIndex === 'number'
       ? Number.isFinite(value.heatIndex)
       : true) &&
+    (typeof value.wbgt === 'number' ? Number.isFinite(value.wbgt) : true) &&
     typeof value.uvIndex === 'number' &&
     Number.isFinite(value.uvIndex) &&
     typeof value.windSpeed === 'number' &&

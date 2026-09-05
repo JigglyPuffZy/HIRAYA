@@ -15,6 +15,7 @@ import { LiveRefreshStatus } from '@/components/ui/LiveRefreshStatus';
 import { ROUTES } from '@/constants/routes';
 import { DASHBOARD_ICONS, weatherConditionIcon } from '@/constants/dashboardIcons';
 import { formatPercent, formatTemperature } from '@/utils/formatters';
+import { formatPagasaHeatIndexSubtitle } from '@/config/risk-assessment.config';
 import { BorderRadius, FontSize, Spacing } from '@/constants/theme';
 import { useTheme } from '@/context/ThemeContext';
 import { useResponsiveLayout } from '@/hooks/useResponsiveLayout';
@@ -264,22 +265,26 @@ export function DashboardWeatherPanel({
                 iconColor={colors.primary}
               />
               <MetricTile
-                icon={DASHBOARD_ICONS.weather.wind}
-                label="Wind"
-                value={`${Math.round(weather.windKph)} km/h`}
-                tint={colors.primarySoft}
-                styles={styles}
-                iconColor={colors.primary}
-              />
-              <MetricTile
                 icon={DASHBOARD_ICONS.weather.feelsLike}
-                label="Feels like"
-                value={formatTemperature(weather.feelsLike)}
+                label="Heat index"
+                value={formatTemperature(weather.heatIndex)}
                 tint={colors.warningSoft}
                 styles={styles}
                 iconColor={colors.primary}
               />
+              <MetricTile
+                icon={DASHBOARD_ICONS.weather.section}
+                label="WBGT"
+                value={formatTemperature(weather.wbgt)}
+                tint={colors.primarySoft}
+                styles={styles}
+                iconColor={colors.primary}
+              />
             </View>
+
+            <AppText variant="caption" muted style={{ textAlign: 'center' }}>
+              PAGASA {formatPagasaHeatIndexSubtitle(weather.heatIndex)} · WBGT est.
+            </AppText>
 
             <View style={styles.refreshWrap}>
               <LiveRefreshStatus

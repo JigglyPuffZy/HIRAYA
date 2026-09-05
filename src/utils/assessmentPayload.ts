@@ -15,6 +15,7 @@ export function buildEnvironmentalData(
     feelsLike: weather.feelsLike,
     humidity: weather.humidity,
     heatIndex: weather.heatIndex,
+    wbgt: weather.wbgt,
     uvIndex: weather.uvIndex,
     windSpeed: weather.windSpeed,
     windKph: weather.windKph,
