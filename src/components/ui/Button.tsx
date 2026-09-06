@@ -39,7 +39,7 @@ export function Button({
   const { colors, shadows } = useTheme();
   const isDisabled = disabled || loading;
   const isPrimary = variant === 'primary';
-  const radius = size === 'lg' ? BorderRadius.xl : size === 'sm' ? BorderRadius.md : BorderRadius.lg;
+  const radius = size === 'lg' ? BorderRadius.lg : size === 'sm' ? BorderRadius.md : BorderRadius.lg;
 
   const textColor = useMemo(() => {
     if (variant === 'primary' || variant === 'secondary') {
@@ -54,7 +54,7 @@ export function Button({
   const variantStyle = useMemo(() => {
     switch (variant) {
       case 'secondary':
-        return { backgroundColor: colors.primaryDark, ...shadows.sm };
+        return { backgroundColor: colors.accentNavy, ...shadows.sm };
       case 'outline':
         return {
           backgroundColor: colors.surface,
@@ -83,7 +83,7 @@ export function Button({
       disabled={isDisabled}
       style={({ pressed }) => [
         fullWidth && styles.fullWidth,
-        isPrimary && { borderRadius: radius, ...shadows.glow },
+        isPrimary && { borderRadius: radius, ...shadows.sm },
         !isPrimary && [styles.solidBase, sizeStyles[size], variantStyle, { borderRadius: radius }],
         pressed && !isDisabled && styles.pressed,
         isDisabled && styles.disabled,
@@ -95,7 +95,7 @@ export function Button({
         <LinearGradient
           colors={[colors.primaryLight, colors.primary, colors.primaryDark]}
           start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
+          end={{ x: 1, y: 0 }}
           style={[sizeStyles[size], styles.gradient, { borderRadius: radius }, fullWidth && styles.fullWidth]}
         >
           {content}
@@ -120,8 +120,8 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   pressed: {
-    opacity: 0.9,
-    transform: [{ scale: 0.985 }],
+    opacity: 0.92,
+    transform: [{ scale: 0.99 }],
   },
   disabled: {
     opacity: 0.45,
@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
   },
   text: {
     fontWeight: '700',
-    letterSpacing: 0.3,
+    letterSpacing: 0.2,
   },
 });
 
@@ -144,14 +144,14 @@ const sizeStyles = StyleSheet.create<Record<ButtonSize, ViewStyle>>({
     minHeight: 40,
   },
   md: {
-    paddingVertical: 14,
+    paddingVertical: 13,
     paddingHorizontal: Spacing.lg,
     minHeight: 48,
   },
   lg: {
-    paddingVertical: Spacing.md + 2,
+    paddingVertical: Spacing.md,
     paddingHorizontal: Spacing.xl,
-    minHeight: 58,
+    minHeight: 54,
   },
 });
 

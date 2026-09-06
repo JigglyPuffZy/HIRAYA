@@ -20,43 +20,47 @@ export function SectionHeader({
   title,
   subtitle,
   icon,
-  iconVariant = 'plain',
+  iconVariant = 'badge',
   actionLabel,
   onAction,
   rightSlot,
 }: SectionHeaderProps) {
   const { colors } = useTheme();
-  const { font, size } = useResponsiveLayout();
+  const { font } = useResponsiveLayout();
 
   return (
     <View style={styles.container}>
       <View style={styles.left}>
+        <View style={[styles.accentBar, { backgroundColor: colors.primary }]} />
         {icon ? (
           iconVariant === 'badge' ? (
             <View
               style={[
                 styles.iconWrap,
                 {
-                  backgroundColor: colors.primarySoft,
-                  borderColor: colors.accentPeach,
+                  backgroundColor: colors.surface,
+                  borderColor: colors.borderLight,
                 },
               ]}
             >
-              <Ionicons name={icon} size={18} color={colors.primary} />
+              <Ionicons name={icon} size={17} color={colors.primary} />
             </View>
           ) : (
-            <Ionicons name={icon} size={size.sectionIcon} color={colors.primary} style={styles.plainIcon} />
+            <Ionicons name={icon} size={18} color={colors.primary} style={styles.plainIcon} />
           )
         ) : null}
         <View style={styles.text}>
           <AppText
             variant="subtitle"
-            style={[styles.title, { fontSize: font.sectionTitle, lineHeight: Math.round(font.sectionTitle * 1.35) }]}
+            style={[
+              styles.title,
+              { fontSize: font.sectionTitle, lineHeight: Math.round(font.sectionTitle * 1.3) },
+            ]}
           >
             {title}
           </AppText>
           {subtitle ? (
-            <AppText variant="caption" muted>
+            <AppText variant="caption" muted style={styles.subtitle}>
               {subtitle}
             </AppText>
           ) : null}
@@ -72,16 +76,16 @@ export function SectionHeader({
           style={({ pressed }) => [
             styles.action,
             {
-              backgroundColor: colors.surface,
-              borderColor: colors.borderLight,
+              backgroundColor: colors.primarySoft,
+              borderColor: colors.accentPeach,
             },
             pressed && styles.pressed,
           ]}
         >
-          <AppText variant="label" style={{ color: colors.primary }}>
+          <AppText variant="label" style={{ color: colors.primaryDark }}>
             {actionLabel}
           </AppText>
-          <Ionicons name="chevron-forward" size={14} color={colors.primary} />
+          <Ionicons name="chevron-forward" size={14} color={colors.primaryDark} />
         </Pressable>
       ) : null}
     </View>
@@ -94,7 +98,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     justifyContent: 'space-between',
     gap: Spacing.sm,
-    marginBottom: Spacing.sm,
+    marginBottom: Spacing.md,
     flexWrap: 'wrap',
   },
   left: {
@@ -104,10 +108,15 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
     minWidth: 0,
   },
+  accentBar: {
+    width: 3,
+    height: 36,
+    borderRadius: 2,
+  },
   iconWrap: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
+    width: 36,
+    height: 36,
+    borderRadius: BorderRadius.md,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
@@ -121,13 +130,17 @@ const styles = StyleSheet.create({
     minWidth: 0,
   },
   title: {
-    letterSpacing: -0.2,
+    letterSpacing: -0.3,
+    fontWeight: '700',
+  },
+  subtitle: {
+    lineHeight: 18,
   },
   action: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 2,
-    paddingVertical: Spacing.xs,
+    paddingVertical: 6,
     paddingHorizontal: Spacing.sm,
     borderRadius: BorderRadius.full,
     borderWidth: 1,

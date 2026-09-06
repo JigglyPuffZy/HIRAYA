@@ -16,7 +16,7 @@ interface HeaderProps {
 
 export function Header({ title, subtitle, showBack = false, rightAction }: HeaderProps) {
   const router = useRouter();
-  const { colors } = useTheme();
+  const { colors, shadows } = useTheme();
 
   return (
     <View style={styles.container}>
@@ -30,7 +30,6 @@ export function Header({ title, subtitle, showBack = false, rightAction }: Heade
                 router.back();
                 return;
               }
-
               router.replace(ROUTES.DASHBOARD);
             }}
             style={({ pressed }) => [
@@ -39,10 +38,11 @@ export function Header({ title, subtitle, showBack = false, rightAction }: Heade
                 backgroundColor: colors.surface,
                 borderColor: colors.borderLight,
               },
+              shadows.sm,
               pressed && styles.pressed,
             ]}
           >
-            <Ionicons name="chevron-back" size={20} color={colors.text} />
+            <Ionicons name="arrow-back" size={18} color={colors.text} />
           </Pressable>
         ) : (
           <View style={styles.backPlaceholder} />
@@ -51,15 +51,19 @@ export function Header({ title, subtitle, showBack = false, rightAction }: Heade
       </View>
 
       <View style={styles.titleBlock}>
-        <AppText variant="title" style={styles.title} numberOfLines={2}>
-          {title}
-        </AppText>
-        <View style={[styles.accentLine, { backgroundColor: colors.primary }]} />
-        {subtitle ? (
-          <AppText variant="body" muted numberOfLines={3} style={styles.subtitle}>
-            {subtitle}
-          </AppText>
-        ) : null}
+        <View style={styles.titleRow}>
+          <View style={[styles.accentBar, { backgroundColor: colors.primary }]} />
+          <View style={styles.titleText}>
+            <AppText variant="title" style={styles.title} numberOfLines={2}>
+              {title}
+            </AppText>
+            {subtitle ? (
+              <AppText variant="body" muted numberOfLines={3} style={styles.subtitle}>
+                {subtitle}
+              </AppText>
+            ) : null}
+          </View>
+        </View>
       </View>
     </View>
   );
@@ -67,7 +71,7 @@ export function Header({ title, subtitle, showBack = false, rightAction }: Heade
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: Spacing.md,
+    marginBottom: Spacing.sm,
     gap: Spacing.md,
   },
   topRow: {
@@ -76,16 +80,16 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   backButton: {
-    width: 42,
-    height: 42,
+    width: 40,
+    height: 40,
     borderRadius: BorderRadius.md,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
   backPlaceholder: {
-    width: 42,
-    height: 42,
+    width: 40,
+    height: 40,
   },
   pressed: {
     opacity: 0.75,
@@ -93,15 +97,27 @@ const styles = StyleSheet.create({
   titleBlock: {
     gap: Spacing.sm,
   },
-  title: {
-    fontSize: 30,
-    lineHeight: 36,
-    letterSpacing: -0.8,
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: Spacing.md,
   },
-  accentLine: {
-    width: 40,
-    height: 4,
+  accentBar: {
+    width: 4,
+    minHeight: 44,
     borderRadius: 2,
+    marginTop: 4,
+  },
+  titleText: {
+    flex: 1,
+    gap: 6,
+    minWidth: 0,
+  },
+  title: {
+    fontSize: 26,
+    lineHeight: 32,
+    letterSpacing: -0.7,
+    fontWeight: '800',
   },
   subtitle: {
     lineHeight: 22,

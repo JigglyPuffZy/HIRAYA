@@ -8,6 +8,7 @@ import { RiskResultPayload } from '@/types/prediction';
 import { buildStructuredSafetyRecommendations, filterConditionSafetySections } from '@/services/safety-recommendations/safety-recommendation.engine';
 import { RefreshTrigger } from '@/constants/assessmentHistorySource';
 import { SafetyRecommendationSection } from '@/types/riskAssessment';
+import { normalizeDisplayedRiskScore, resolveRiskResultDisplay } from '@/utils/riskScore';
 
 type LocalAssessmentRecord = {
   historyItem: AssessmentHistoryItem | null;
@@ -30,7 +31,7 @@ function buildLocalRecord(
     historyItem: {
       id: latest.id,
       riskLevel: latest.payload.prediction.riskLevel,
-      prediction: latest.payload.prediction.prediction,
+      prediction: resolveRiskResultDisplay(latest.payload).score,
       assessedAt: latest.payload.submittedAt,
       weatherSummary: latest.payload.weather.location,
     },
@@ -162,7 +163,11 @@ export function useDashboardData() {
     localRecord.detail?.submittedAt ?? localRecord.historyItem?.assessedAt;
 
   const displayRiskLevel = assessment?.level ?? localRiskLevel;
-  const displayRiskScore = assessment?.riskScore ?? localRiskScore;
+  const displayRiskScore =
+    assessment?.riskScore ??
+    (localRecord.detail
+      ? resolveRiskResultDisplay(localRecord.detail).score
+      : normalizeDisplayedRiskScore(localRiskScore));
   const displayAssessedAt = assessment?.assessedAt ?? localAssessedAt;
 
   const latestAssessment =

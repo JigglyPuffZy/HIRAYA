@@ -7,7 +7,10 @@ export interface AssessmentDisplayItem {
   value: string;
 }
 
-export function formatAssessmentValue(value: string | number | boolean | string[]): string {
+export function formatAssessmentValue(
+  value: string | number | boolean | string[],
+  fieldId?: string,
+): string {
   if (Array.isArray(value)) {
     return value.length > 0 ? value.join(', ') : 'None';
   }
@@ -16,7 +19,21 @@ export function formatAssessmentValue(value: string | number | boolean | string[
     return value ? 'Yes' : 'No';
   }
 
-  return String(value);
+  if (fieldId) {
+    const fieldDefinition = ASSESSMENT_FIELD_DEFINITIONS.find(
+      (field) => field.id === fieldId,
+    );
+    if (fieldDefinition?.type === 'select') {
+      const match = fieldDefinition.options.find(
+        (option) => option.value === String(value),
+      );
+      if (match) {
+        return match.label;
+      }
+    }
+  }
+
+  return String(value).replace(/_/g, ' ');
 }
 
 export function buildAssessmentDisplayItems(
@@ -30,7 +47,7 @@ export function buildAssessmentDisplayItems(
     return {
       key,
       label: fieldDefinition?.label ?? key,
-      value: formatAssessmentValue(value),
+      value: formatAssessmentValue(value, key),
     };
   });
 }

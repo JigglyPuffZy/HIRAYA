@@ -69,6 +69,14 @@ function mergeVulnerabilityInput(
       typeof merged.general_status === 'string'
         ? merged.general_status
         : undefined,
+    occupation:
+      typeof merged.occupation === 'string' ? merged.occupation : undefined,
+    timeInSun:
+      typeof merged.time_in_sun === 'string'
+        ? merged.time_in_sun
+        : typeof merged.typical_sun_exposure === 'string'
+          ? merged.typical_sun_exposure
+          : undefined,
   };
 }
 

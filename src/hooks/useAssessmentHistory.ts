@@ -11,14 +11,11 @@ import { useAuth } from '@/hooks/useAuth';
 import { isApiConfigured, isSupabaseConfigured } from '@/config/env';
 
 import {
-
   AssessmentHistoryError,
-
   AssessmentHistoryItem,
-
   AssessmentHistoryLoadState,
-
 } from '@/types/assessmentHistory';
+import { resolveRiskResultDisplay } from '@/utils/riskScore';
 
 
 
@@ -32,7 +29,7 @@ function mapLocalRecords(userId: string): Promise<AssessmentHistoryItem[]> {
 
       riskLevel: record.payload.prediction.riskLevel,
 
-      prediction: record.payload.prediction.prediction,
+      prediction: resolveRiskResultDisplay(record.payload).score,
 
       assessedAt: record.payload.submittedAt,
 

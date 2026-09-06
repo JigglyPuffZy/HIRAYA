@@ -61,11 +61,11 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderRadius: BorderRadius.xl,
+    borderRadius: BorderRadius.lg,
     paddingHorizontal: Spacing.md,
-    paddingVertical: 15,
+    paddingVertical: 14,
     fontSize: FontSize.md,
-    minHeight: 54,
+    minHeight: 52,
   },
   inputError: {
     borderWidth: 1.5,

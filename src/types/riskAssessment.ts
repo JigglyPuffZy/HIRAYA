@@ -1,11 +1,15 @@
 import { RiskLevelCategory } from '@/constants/riskLevels';
 import { HeatSensitiveConditionId } from '@/constants/health-vulnerability';
+import { OccupationType, TimeInSunLevel } from '@/constants/workSunExposure';
 
 export interface VulnerabilityInput {
   age?: number;
   /** @deprecated Use healthConditions */
   healthCondition?: string;
   healthConditions?: HeatSensitiveConditionId[];
+  occupation?: OccupationType | string;
+  /** Session value overrides profile typical_sun_exposure when set. */
+  timeInSun?: TimeInSunLevel | string;
   activityLevel?: string;
   hydration?: string | boolean;
   generalStatus?: string;

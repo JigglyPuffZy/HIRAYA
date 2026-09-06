@@ -40,11 +40,10 @@ export default function HistoryScreen() {
   };
 
   return (
-    <ScreenContainer>
+    <ScreenContainer decorative>
       <Header
-        title="History"
-        subtitle="Review your past heat risk assessments."
-        showBack
+        title="Assessment History"
+        subtitle="Review past heat risk check-ins and auto-refresh updates."
       />
 
       {isLoading ? (

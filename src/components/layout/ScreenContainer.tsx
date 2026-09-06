@@ -48,7 +48,10 @@ export function ScreenContainer({
       : 0;
   const { colors } = useTheme();
   const { screenPadding, maxContentWidth } = useResponsiveLayout();
-  const bottomPadding = Math.max(insets.bottom, Spacing.xl) + tabBarHeight;
+  const bottomPadding =
+    Math.max(insets.bottom, Spacing.xl) +
+    tabBarHeight +
+    (tabBarHeight > 0 ? Spacing.lg : 0);
 
   const inner = (
     <View
@@ -125,7 +128,7 @@ export function ScreenContainer({
     >
       {decorative ? <DecorativeBackground /> : null}
       {showTopAccent ? (
-        <View style={[styles.topAccent, { backgroundColor: colors.primary }]} />
+        <View style={[styles.topAccent, { backgroundColor: colors.accentNavy }]} />
       ) : null}
       <View style={[styles.contentWrap, { maxWidth: maxContentWidth }]}>
         {wrapped}

@@ -33,6 +33,11 @@ const EDIT_GROUPS: { title: string; icon: keyof typeof Ionicons.glyphMap; ids: s
   { title: 'Personal', icon: 'person-outline', ids: ['age'] },
   { title: 'Health & vulnerability', icon: 'fitness-outline', ids: ['health_conditions'] },
   {
+    title: 'Work & sun exposure',
+    icon: 'briefcase-outline',
+    ids: ['occupation', 'typical_sun_exposure'],
+  },
+  {
     title: 'Daily baseline',
     icon: 'sunny-outline',
     ids: ['activity_level', 'hydration_status', 'general_status'],

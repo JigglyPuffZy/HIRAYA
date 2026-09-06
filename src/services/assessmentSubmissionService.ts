@@ -30,8 +30,9 @@ import {
   buildStructuredSafetyRecommendations,
   flattenSafetySections,
 } from '@/services/safety-recommendations/safety-recommendation.engine';
-import { combineTreeAndMlRiskLevel, RISK_LEVEL_ORDER } from '@/config/risk-assessment.config';
+import { combineTreeAndMlRiskLevel, applyPagasaPersonalizedCeiling } from '@/config/risk-assessment.config';
 import { RiskLevelCategory } from '@/constants/riskLevels';
+import { computeRiskDisplayScore } from '@/services/decision-tree/heat-risk-classifier';
 import { CurrentWeatherSnapshot, EnvironmentalSnapshot, HeatDataSource } from '@/types/environmental';
 import {
   AssessmentRecordSource,
@@ -44,6 +45,13 @@ function createRecordId(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
+function normalizeMlProbability(value: number): number {
+  if (!Number.isFinite(value)) {
+    return 0;
+  }
+  return value > 1 ? value / 100 : value;
+}
+
 function assessmentToPrediction(
   treeResult: HeatRiskAssessmentResult,
   profile?: AssessmentInputData,
@@ -54,24 +62,29 @@ function assessmentToPrediction(
     profile,
   });
 
-  const combinedLevel = mlPrediction
-    ? combineTreeAndMlRiskLevel(
-        treeResult.level,
-        mlPrediction.riskLevel as RiskLevelCategory,
-        mlPrediction.prediction,
-      )
-    : treeResult.level;
+  let finalLevel: RiskLevelCategory = treeResult.level;
 
-  const candidates = [treeResult.level, combinedLevel];
   if (mlPrediction?.riskLevel) {
-    candidates.push(mlPrediction.riskLevel as RiskLevelCategory);
+    finalLevel = combineTreeAndMlRiskLevel(
+      treeResult.level,
+      mlPrediction.riskLevel as RiskLevelCategory,
+      normalizeMlProbability(mlPrediction.prediction),
+      treeResult.heatIndexC,
+      treeResult.environmentalLevel,
+    );
+  } else {
+    finalLevel = applyPagasaPersonalizedCeiling(
+      finalLevel,
+      treeResult.environmentalLevel,
+      treeResult.heatIndexC,
+    );
   }
 
-  const finalLevel = candidates.reduce((best, level) =>
-    RISK_LEVEL_ORDER.indexOf(level) > RISK_LEVEL_ORDER.indexOf(best) ? level : best,
-  treeResult.level);
-
-  const finalScore = treeResult.riskScore;
+  const finalScore = computeRiskDisplayScore(
+    finalLevel,
+    treeResult.vulnerabilityScore,
+    treeResult.heatIndexC,
+  );
 
   return {
     prediction: finalScore,
@@ -167,13 +180,7 @@ export const assessmentSubmissionService = {
       longitude: STUDY_AREA.longitude,
     });
     const submittedAt = new Date().toISOString();
-    const conditionBackup = predictConditionAwareBackup({
-      heatIndexC: weatherSnapshot.heatIndex,
-      humidity: weatherSnapshot.humidity,
-      vulnerability: {},
-      profile: profileData,
-    });
-    const prediction = assessmentToPrediction(treeResult, profileData, conditionBackup);
+    const prediction = assessmentToPrediction(treeResult, profileData);
 
     const payload: RiskResultPayload = {
       prediction,

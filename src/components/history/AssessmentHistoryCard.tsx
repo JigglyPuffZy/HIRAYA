@@ -7,6 +7,7 @@ import { getRiskLevelVisualStyle, formatRiskLevelBadge, formatRiskLevelLabel } f
 import { BorderRadius, FontSize, Spacing } from '@/constants/theme';
 import { useTheme } from '@/context/ThemeContext';
 import { formatDateTime } from '@/utils/formatters';
+import { normalizeDisplayedRiskScore } from '@/utils/riskScore';
 
 interface AssessmentHistoryCardProps {
   item: AssessmentHistoryItem;
@@ -17,10 +18,19 @@ export function AssessmentHistoryCard({
   item,
   onPress,
 }: AssessmentHistoryCardProps) {
-  const { colors } = useTheme();
+  const { colors, shadows } = useTheme();
   const visual = getRiskLevelVisualStyle(item.riskLevel);
-  const showPrediction =
-    typeof item.prediction === 'number' && Number.isFinite(item.prediction);
+  const displayScore = normalizeDisplayedRiskScore(item.prediction);
+  const showPrediction = typeof displayScore === 'number';
+
+  const sourceLabel =
+    item.source === 'live_refresh'
+      ? 'Auto-refresh'
+      : item.source === 'user_refresh'
+        ? 'Manual refresh'
+        : item.source === 'manual_assessment'
+          ? 'Check-in'
+          : null;
 
   return (
     <Pressable
@@ -29,8 +39,8 @@ export function AssessmentHistoryCard({
       onPress={() => onPress(item)}
       style={({ pressed }) => [pressed && styles.pressed]}
     >
-      <Card style={styles.card}>
-        <View style={[styles.accentBar, { backgroundColor: colors.primary }]} />
+      <Card style={styles.card} padded={false}>
+        <View style={[styles.accentStripe, { backgroundColor: visual.accentColor }]} />
         <View style={styles.content}>
           <View style={styles.headerRow}>
             <View style={styles.headerText}>
@@ -42,23 +52,15 @@ export function AssessmentHistoryCard({
                   {item.weatherSummary}
                 </AppText>
               ) : null}
-              {item.source === 'live_refresh' ? (
-                <AppText variant="caption" style={{ color: colors.primary, fontWeight: '600' }}>
-                  Auto-refresh
-                </AppText>
-              ) : null}
-              {item.source === 'user_refresh' ? (
-                <AppText variant="caption" style={{ color: colors.primary, fontWeight: '600' }}>
-                  You refreshed
-                </AppText>
-              ) : null}
-              {item.source === 'manual_assessment' ? (
-                <AppText variant="caption" style={{ color: colors.primary, fontWeight: '600' }}>
-                  Risk check-in
-                </AppText>
+              {sourceLabel ? (
+                <View style={[styles.sourceChip, { backgroundColor: colors.primarySoft, borderColor: colors.accentPeach }]}>
+                  <AppText variant="caption" style={{ color: colors.primaryDark, fontWeight: '600', fontSize: 10 }}>
+                    {sourceLabel}
+                  </AppText>
+                </View>
               ) : null}
             </View>
-            <View style={[styles.badge, { backgroundColor: visual.accentColor }]}>
+            <View style={[styles.badge, { backgroundColor: visual.accentColor }, shadows.sm]}>
               <AppText variant="caption" style={[styles.badgeText, { color: colors.onPrimary }]} numberOfLines={1}>
                 {formatRiskLevelBadge(item.riskLevel)}
               </AppText>
@@ -66,19 +68,21 @@ export function AssessmentHistoryCard({
           </View>
 
           {showPrediction ? (
-            <View style={styles.scoreRow}>
+            <View style={[styles.scoreRow, { backgroundColor: colors.surfaceMuted, borderColor: colors.borderLight }]}>
               <AppText variant="caption" muted>
                 Risk score
               </AppText>
-              <AppText variant="label" style={[styles.score, { color: colors.primary }]}>
-                {item.prediction}
+              <AppText variant="label" style={[styles.score, { color: colors.primaryDark }]}>
+                {displayScore}
               </AppText>
             </View>
           ) : null}
 
           <View style={styles.footerRow}>
-            <View style={styles.footerSpacer} />
-            <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+            <AppText variant="caption" style={{ color: colors.primary }}>
+              View details
+            </AppText>
+            <Ionicons name="chevron-forward" size={16} color={colors.primary} />
           </View>
         </View>
       </Card>
@@ -88,21 +92,19 @@ export function AssessmentHistoryCard({
 
 const styles = StyleSheet.create({
   card: {
-    flexDirection: 'row',
-    padding: 0,
     overflow: 'hidden',
   },
-  accentBar: {
-    width: 4,
+  accentStripe: {
+    height: 3,
+    width: '100%',
   },
   content: {
-    flex: 1,
     padding: Spacing.lg,
     gap: Spacing.sm,
   },
   pressed: {
     opacity: 0.92,
-    transform: [{ scale: 0.99 }],
+    transform: [{ scale: 0.995 }],
   },
   headerRow: {
     flexDirection: 'row',
@@ -113,7 +115,15 @@ const styles = StyleSheet.create({
   headerText: {
     flex: 1,
     minWidth: 0,
-    gap: 2,
+    gap: 4,
+  },
+  sourceChip: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 3,
+    borderRadius: BorderRadius.full,
+    borderWidth: 1,
+    marginTop: 2,
   },
   badge: {
     paddingHorizontal: Spacing.sm,
@@ -129,18 +139,22 @@ const styles = StyleSheet.create({
   scoreRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     gap: Spacing.sm,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
   },
   score: {
     fontSize: FontSize.lg,
+    fontWeight: '800',
   },
   footerRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'flex-end',
+    gap: 4,
     marginTop: Spacing.xs,
-  },
-  footerSpacer: {
-    flex: 1,
   },
 });

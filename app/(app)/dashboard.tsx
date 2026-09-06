@@ -42,12 +42,22 @@ export default function DashboardScreen() {
 
   return (
     <ScreenContainer
-      showTopAccent
       decorative
       refreshing={isWeatherRefreshing}
       onRefresh={() => refreshDashboard({ trigger: 'user' })}
     >
       <DashboardHeader userName={user?.fullName} lastUpdated={lastUpdated} />
+
+      <DashboardRiskStatus
+        riskLevel={displayRiskLevel}
+        prediction={displayRiskScore}
+        assessedAt={displayAssessedAt}
+        assessmentId={latestAssessment.historyItem?.id}
+        isLoading={isRiskLoading}
+        isRefreshing={isRiskRefreshing}
+        error={riskError}
+        onRetry={retryRisk}
+      />
 
       <DashboardWeatherPanel
         weather={weather}
@@ -60,17 +70,6 @@ export default function DashboardScreen() {
       />
 
       <DashboardQuickActions />
-
-      <DashboardRiskStatus
-        riskLevel={displayRiskLevel}
-        prediction={displayRiskScore}
-        assessedAt={displayAssessedAt}
-        assessmentId={latestAssessment.historyItem?.id}
-        isLoading={isRiskLoading}
-        isRefreshing={isRiskRefreshing}
-        error={riskError}
-        onRetry={retryRisk}
-      />
 
       <SafetyRecommendations structuredSections={safetySections} />
     </ScreenContainer>

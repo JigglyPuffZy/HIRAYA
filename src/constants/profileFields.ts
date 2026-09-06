@@ -1,4 +1,8 @@
 import { HEAT_SENSITIVE_CONDITION_OPTIONS } from '@/constants/health-vulnerability';
+import {
+  OCCUPATION_OPTIONS,
+  TYPICAL_SUN_EXPOSURE_OPTIONS,
+} from '@/constants/workSunExposure';
 import { ProfileFieldDefinition } from '@/types/userProfile';
 
 /**
@@ -24,6 +28,24 @@ export const PROFILE_FIELD_DEFINITIONS: ProfileFieldDefinition[] = [
       label: option.label,
       value: option.value,
     })),
+  },
+  {
+    id: 'occupation',
+    type: 'select',
+    label: 'Occupation / work environment',
+    required: true,
+    placeholder: 'Select occupation',
+    helperText: 'Outdoor and mixed roles often face higher heat and sun exposure.',
+    options: OCCUPATION_OPTIONS,
+  },
+  {
+    id: 'typical_sun_exposure',
+    type: 'select',
+    label: 'Typical time in direct sun',
+    required: true,
+    placeholder: 'Select usual sun exposure',
+    helperText: 'Average daily time in direct sunlight for your routine.',
+    options: TYPICAL_SUN_EXPOSURE_OPTIONS,
   },
   {
     id: 'activity_level',

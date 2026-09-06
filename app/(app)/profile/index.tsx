@@ -6,6 +6,8 @@ import { useRouter } from 'expo-router';
 
 import { ScreenContainer } from '@/components/layout/ScreenContainer';
 
+import { Header } from '@/components/layout/Header';
+
 import { ProfileHero } from '@/components/profile/ProfileHero';
 
 import { ProfileQuickStats } from '@/components/profile/ProfileQuickStats';
@@ -34,7 +36,7 @@ import { PROFILE_FIELD_DEFINITIONS } from '@/constants/profileFields';
 
 import { ROUTES } from '@/constants/routes';
 
-import { BorderRadius, FontSize, Spacing } from '@/constants/theme';
+import { Spacing } from '@/constants/theme';
 
 import { getProfileCompletionPercent } from '@/utils/profileCompletion';
 
@@ -106,28 +108,6 @@ export default function ProfileScreen() {
 
       StyleSheet.create({
 
-        pageTitle: {
-
-          fontSize: FontSize.xxl,
-
-          fontWeight: '800',
-
-          letterSpacing: -0.6,
-
-          color: colors.text,
-
-        },
-
-        pageSubtitle: {
-
-          color: colors.textSecondary,
-
-          lineHeight: 22,
-
-          marginTop: 4,
-
-        },
-
         sectionGap: {
 
           gap: Spacing.lg,
@@ -140,7 +120,7 @@ export default function ProfileScreen() {
 
           padding: Spacing.md,
 
-          borderRadius: BorderRadius.xl,
+          borderRadius: 20,
 
           backgroundColor: colors.surface,
 
@@ -268,17 +248,13 @@ export default function ProfileScreen() {
 
     <ScreenContainer decorative>
 
-      <View>
+      <Header
 
-        <AppText style={styles.pageTitle}>Profile</AppText>
+        title="Profile"
 
-        <AppText style={styles.pageSubtitle}>
+        subtitle="Manage your account and health details for personalized heat-risk guidance."
 
-          Manage your account and health details for personalized heat-risk guidance.
-
-        </AppText>
-
-      </View>
+      />
 
 
 

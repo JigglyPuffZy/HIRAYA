@@ -8,10 +8,12 @@ import { Card } from '@/components/ui/Card';
 import { AppText } from '@/components/ui/AppText';
 import { RiskResultPayload } from '@/types/prediction';
 import { ROUTES } from '@/constants/routes';
-import { Colors, BorderRadius, Spacing } from '@/constants/theme';
+import { BorderRadius, Spacing } from '@/constants/theme';
+import { useTheme } from '@/context/ThemeContext';
 
 export default function AssessmentScreen() {
   const router = useRouter();
+  const { colors } = useTheme();
 
   const handleSuccess = (result: RiskResultPayload) => {
     router.push({
@@ -26,18 +28,22 @@ export default function AssessmentScreen() {
     <ScreenContainer keyboardAvoiding decorative contentStyle={styles.content}>
       <Header
         title="Risk Check-in"
-        subtitle="Answer a few quick questions — we'll use live Tuguegarao weather."
-        showBack
+        subtitle="Answer a few questions — we'll combine them with live Tuguegarao weather."
       />
 
       <Card variant="soft" style={styles.infoCard}>
         <View style={styles.infoRow}>
-          <View style={styles.infoIcon}>
-            <Ionicons name="pulse-outline" size={20} color={Colors.primary} />
+          <View style={[styles.infoIcon, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}>
+            <Ionicons name="shield-checkmark-outline" size={20} color={colors.primary} />
           </View>
-          <AppText variant="caption" style={styles.infoText}>
-            Your result updates instantly using real-time weather and your health profile.
-          </AppText>
+          <View style={styles.infoTextBlock}>
+            <AppText variant="label" style={{ color: colors.text }}>
+              Personalized assessment
+            </AppText>
+            <AppText variant="caption" muted style={styles.infoText}>
+              Your result updates instantly using real-time weather and your health profile.
+            </AppText>
+          </View>
         </View>
       </Card>
 
@@ -57,21 +63,21 @@ const styles = StyleSheet.create({
   infoRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: Spacing.sm,
+    gap: Spacing.md,
   },
   infoIcon: {
-    width: 36,
-    height: 36,
+    width: 40,
+    height: 40,
     borderRadius: BorderRadius.md,
-    backgroundColor: Colors.surface,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: Colors.borderLight,
+  },
+  infoTextBlock: {
+    flex: 1,
+    gap: 4,
   },
   infoText: {
-    flex: 1,
-    color: Colors.primaryDark,
     lineHeight: 20,
   },
 });

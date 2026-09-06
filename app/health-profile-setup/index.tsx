@@ -179,6 +179,7 @@ export default function HealthProfileSetupScreen() {
             <View style={styles.checklist}>
               {[
                 'Age and daily activity level',
+                'Occupation and typical sun exposure',
                 'Usual hydration and wellness baseline',
                 'Heat-sensitive health conditions (optional)',
               ].map((item) => (

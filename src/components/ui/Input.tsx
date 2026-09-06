@@ -18,7 +18,7 @@ export function Input({ label, error, style, ...props }: InputProps) {
 
   return (
     <View style={styles.container}>
-      <Text style={[styles.label, { color: colors.text }]}>{label}</Text>
+      <Text style={[styles.label, { color: colors.textSecondary }]}>{label}</Text>
       <TextInput
         placeholderTextColor={colors.textMuted}
         style={[
@@ -39,20 +39,23 @@ export function Input({ label, error, style, ...props }: InputProps) {
 
 const styles = StyleSheet.create({
   container: {
-    gap: Spacing.xs,
+    gap: 6,
   },
   label: {
     fontSize: FontSize.sm,
     fontWeight: '600',
+    letterSpacing: 0.1,
   },
   input: {
     borderWidth: 1,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.lg,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.md,
     fontSize: FontSize.md,
+    minHeight: 50,
   },
   error: {
     fontSize: FontSize.sm,
+    fontWeight: '500',
   },
 });

@@ -73,6 +73,13 @@ export const VULNERABILITY_POINTS = {
   hydrationDehydrated: 20,
   generalMildDiscomfort: 10,
   generalNotWell: 18,
+  occupationOutdoor: 10,
+  occupationMixed: 6,
+  occupationStudent: 3,
+  sunUnder30Min: 3,
+  sun30MinTo1H: 8,
+  sun1To3H: 14,
+  sunOver3H: 20,
 } as const;
 
 /** Personal risk bump above environmental level (conservative, real-time friendly). */
@@ -136,22 +143,63 @@ export function maxRiskLevel(
   return RISK_LEVEL_ORDER.indexOf(a) >= RISK_LEVEL_ORDER.indexOf(b) ? a : b;
 }
 
+/**
+ * Caps personalized risk to PAGASA-aligned limits:
+ * - HI < 27: at most Caution (personal factors on a below-caution day)
+ * - HI 27–41: at most Extreme Caution (PAGASA top band for this range)
+ * - HI ≥ 42: Danger / Extreme Danger allowed
+ * Never more than one step above the environmental band.
+ */
+export function applyPagasaPersonalizedCeiling(
+  level: RiskLevelCategory,
+  environmentalLevel: RiskLevelCategory,
+  heatIndexC: number,
+): RiskLevelCategory {
+  const absoluteCeiling: RiskLevelCategory =
+    heatIndexC >= 42 ? 'EXTREME' : heatIndexC < 27 ? 'MODERATE' : 'HIGH';
+
+  const envEscalationCap = escalateLevel(environmentalLevel, 1);
+  const cap =
+    RISK_LEVEL_ORDER.indexOf(envEscalationCap) <=
+    RISK_LEVEL_ORDER.indexOf(absoluteCeiling)
+      ? envEscalationCap
+      : absoluteCeiling;
+
+  if (RISK_LEVEL_ORDER.indexOf(level) <= RISK_LEVEL_ORDER.indexOf(cap)) {
+    return level;
+  }
+
+  return cap;
+}
+
 /** Decision tree is primary; ML may nudge at most one level when confident. */
 export function combineTreeAndMlRiskLevel(
   treeLevel: RiskLevelCategory,
   mlLevel: RiskLevelCategory,
   mlProbability: number,
+  heatIndexC?: number,
+  environmentalLevel?: RiskLevelCategory,
 ): RiskLevelCategory {
   const treeIndex = RISK_LEVEL_ORDER.indexOf(treeLevel);
   const mlIndex = RISK_LEVEL_ORDER.indexOf(mlLevel);
 
+  let combined = treeLevel;
+
   if (mlProbability >= 0.62 && mlIndex > treeIndex) {
-    return RISK_LEVEL_ORDER[Math.min(treeIndex + 1, mlIndex)];
+    combined = RISK_LEVEL_ORDER[Math.min(treeIndex + 1, mlIndex)];
   }
 
   if (mlProbability <= 0.22 && mlIndex < treeIndex) {
-    return mlLevel;
+    combined = mlLevel;
   }
 
-  return treeLevel;
+  if (
+    typeof heatIndexC === 'number' &&
+    environmentalLevel &&
+    Number.isFinite(heatIndexC)
+  ) {
+    return applyPagasaPersonalizedCeiling(combined, environmentalLevel, heatIndexC);
+  }
+
+  return combined;
 }

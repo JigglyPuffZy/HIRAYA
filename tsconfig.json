@@ -15,6 +15,7 @@
   "exclude": [
     "supabase/functions/**",
     "backend/**",
+    "scripts/**",
     "node_modules"
   ]
 }

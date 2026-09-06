@@ -10,10 +10,17 @@ import {
   RISK_LEVEL_ORDER,
   VULNERABILITY_ESCALATION_THRESHOLDS,
   VULNERABILITY_POINTS,
+  applyPagasaPersonalizedCeiling,
 } from '@/config/risk-assessment.config';
 import { VulnerabilityInput, HeatRiskAssessmentResult } from '@/types/riskAssessment';
 import { RiskLevelCategory, formatRiskLevelPhrase } from '@/constants/riskLevels';
 import { parseHealthConditions } from '@/utils/healthConditions';
+import {
+  formatOccupationLabel,
+  formatTimeInSunLabel,
+  OccupationType,
+  TimeInSunLevel,
+} from '@/constants/workSunExposure';
 
 function normalizeActivity(value?: string): 'low' | 'moderate' | 'high' | null {
   const key = value?.toLowerCase().trim();
@@ -50,6 +57,51 @@ function normalizeGeneralStatus(
   return null;
 }
 
+function normalizeOccupation(value?: string): OccupationType | null {
+  const key = value?.toLowerCase().trim();
+  if (!key) return null;
+  if (key === 'indoor' || key === 'office') return 'indoor';
+  if (key === 'outdoor') return 'outdoor';
+  if (key === 'mixed') return 'mixed';
+  if (key === 'student') return 'student';
+  if (key === 'other') return 'other';
+  return null;
+}
+
+function normalizeTimeInSun(value?: string): TimeInSunLevel | null {
+  const key = value?.toLowerCase().trim();
+  if (!key) return null;
+  if (key === 'none') return 'none';
+  if (key === 'under_30min' || key === 'under_30') return 'under_30min';
+  if (key === '30min_1h' || key === '30_60') return '30min_1h';
+  if (key === '1_3h' || key === '1_3') return '1_3h';
+  if (key === 'over_3h' || key === '3_plus') return 'over_3h';
+  return null;
+}
+
+function isProlongedSunExposure(
+  occupation: OccupationType | null,
+  timeInSun: TimeInSunLevel | null,
+): boolean {
+  if (!timeInSun || timeInSun === 'none') {
+    return false;
+  }
+
+  if (timeInSun === '1_3h' || timeInSun === 'over_3h') {
+    return true;
+  }
+
+  if (occupation === 'outdoor' && timeInSun !== 'under_30min') {
+    return true;
+  }
+
+  if (occupation === 'mixed' && timeInSun === '30min_1h') {
+    return true;
+  }
+
+  return false;
+}
+
 function resolveHealthConditions(input: VulnerabilityInput): HeatSensitiveConditionId[] {
   if (input.healthConditions?.length) {
     return input.healthConditions;
@@ -64,11 +116,14 @@ function environmentalRiskFactorHits(
   humidity: number,
   activity: ReturnType<typeof normalizeActivity>,
   hydration: ReturnType<typeof normalizeHydration>,
+  occupation: ReturnType<typeof normalizeOccupation>,
+  timeInSun: ReturnType<typeof normalizeTimeInSun>,
 ): string[] {
   const config = DISEASE_RISK_CONFIG[conditionId];
   const hits: string[] = [];
   const envLevel = environmentalLevelFromHeatIndex(heatIndexC);
   const isHot = RISK_LEVEL_ORDER.indexOf(envLevel) >= 2;
+  const prolongedSun = isProlongedSunExposure(occupation, timeInSun);
 
   for (const factor of config.riskFactors) {
     if (factor === 'high_heat_index' && isHot) {
@@ -83,8 +138,8 @@ function environmentalRiskFactorHits(
     if (factor === 'dehydration' && hydration === 'dehydrated') {
       hits.push('dehydration');
     }
-    if (factor === 'prolonged_heat_exposure' && isHot) {
-      hits.push('prolonged heat exposure');
+    if (factor === 'prolonged_heat_exposure' && isHot && prolongedSun) {
+      hits.push('prolonged sun / heat exposure');
     }
   }
 
@@ -105,6 +160,8 @@ function computeVulnerabilityScore(
   const conditions = resolveHealthConditions(input);
   const activity = normalizeActivity(input.activityLevel);
   const hydration = normalizeHydration(input.hydration);
+  const occupation = normalizeOccupation(input.occupation);
+  const timeInSun = normalizeTimeInSun(input.timeInSun);
 
   if (typeof input.age === 'number' && Number.isFinite(input.age)) {
     if (input.age <= 12) {
@@ -127,6 +184,8 @@ function computeVulnerabilityScore(
       humidity,
       activity,
       hydration,
+      occupation,
+      timeInSun,
     );
     for (const hit of envHits) {
       const label = `${hit} (relevant to ${config.label})`;
@@ -142,6 +201,31 @@ function computeVulnerabilityScore(
   } else if (conditions.length >= 2) {
     score += COMORBIDITY_CONFIG.multiConditionBonus;
     factors.push('Multiple heat-sensitive conditions');
+  }
+
+  if (occupation === 'outdoor') {
+    score += VULNERABILITY_POINTS.occupationOutdoor;
+    factors.push(`Outdoor occupation (${formatOccupationLabel(occupation)})`);
+  } else if (occupation === 'mixed') {
+    score += VULNERABILITY_POINTS.occupationMixed;
+    factors.push(`Mixed indoor/outdoor work (${formatOccupationLabel(occupation)})`);
+  } else if (occupation === 'student') {
+    score += VULNERABILITY_POINTS.occupationStudent;
+    factors.push(`Student (${formatOccupationLabel(occupation)})`);
+  }
+
+  if (timeInSun === 'under_30min') {
+    score += VULNERABILITY_POINTS.sunUnder30Min;
+    factors.push(`Brief sun exposure (${formatTimeInSunLabel(timeInSun)})`);
+  } else if (timeInSun === '30min_1h') {
+    score += VULNERABILITY_POINTS.sun30MinTo1H;
+    factors.push(`Moderate sun exposure (${formatTimeInSunLabel(timeInSun)})`);
+  } else if (timeInSun === '1_3h') {
+    score += VULNERABILITY_POINTS.sun1To3H;
+    factors.push(`Extended sun exposure (${formatTimeInSunLabel(timeInSun)})`);
+  } else if (timeInSun === 'over_3h') {
+    score += VULNERABILITY_POINTS.sunOver3H;
+    factors.push(`Prolonged sun exposure (${formatTimeInSunLabel(timeInSun)})`);
   }
 
   if (activity === 'moderate') {
@@ -211,6 +295,9 @@ function applyCriticalOverrides(
   const hydration = normalizeHydration(input.hydration);
   const activity = normalizeActivity(input.activityLevel);
   const general = normalizeGeneralStatus(input.generalStatus);
+  const occupation = normalizeOccupation(input.occupation);
+  const timeInSun = normalizeTimeInSun(input.timeInSun);
+  const prolongedSun = isProlongedSunExposure(occupation, timeInSun);
   const hasSevereCondition = conditions.some(
     (id) => DISEASE_RISK_CONFIG[id].heatVulnerability === 'severe',
   );
@@ -236,7 +323,7 @@ function applyCriticalOverrides(
     (isDangerousEnvironment ||
       (isHighEnvironment && (hydration === 'dehydrated' || activity === 'high')))
   ) {
-    return 'EXTREME';
+    level = escalateLevel(level, isDangerousEnvironment ? 2 : 1);
   }
 
   // High-tier sakit (asthma, hypertension, diabetes, …) in hot weather → at least HIGH
@@ -250,11 +337,26 @@ function applyCriticalOverrides(
     hydration === 'dehydrated' &&
     RISK_LEVEL_ORDER.indexOf(level) >= RISK_LEVEL_ORDER.indexOf('HIGH')
   ) {
-    return 'EXTREME';
+    level = escalateLevel(level, 1);
   }
 
   if (activity === 'high' && hasSevereCondition && isDangerousEnvironment) {
-    return 'EXTREME';
+    level = escalateLevel(level, 1);
+  }
+
+  if (
+    occupation === 'outdoor' &&
+    prolongedSun &&
+    isHighEnvironment &&
+    (activity === 'high' || hydration === 'dehydrated')
+  ) {
+    level = escalateLevel(level, 1);
+  }
+
+  if (occupation === 'outdoor' && timeInSun === 'over_3h' && isCautionOrAbove) {
+    level = RISK_LEVEL_ORDER.indexOf(level) < RISK_LEVEL_ORDER.indexOf('HIGH')
+      ? 'HIGH'
+      : level;
   }
 
   if (isElderly && conditions.length > 0 && isHighEnvironment) {
@@ -273,11 +375,11 @@ function applyCriticalOverrides(
   }
 
   if (conditions.length >= 2 && isHighEnvironment && (hasSevereCondition || vulnerabilityScore >= 35)) {
-    return 'EXTREME';
+    level = escalateLevel(level, 1);
   }
 
   if (conditions.length >= 3 && isHighEnvironment) {
-    return 'EXTREME';
+    level = escalateLevel(level, 1);
   }
 
   return level;
@@ -288,22 +390,30 @@ function scoreFromLevel(
   vulnerabilityScore: number,
   heatIndexC: number,
 ): number {
-  const anchors: Record<RiskLevelCategory, number> = {
-    LOW: 15,
-    MODERATE: 38,
-    HIGH: 62,
-    EXTREME: 82,
-    UNKNOWN: 38,
+  const bands: Record<RiskLevelCategory, { min: number; max: number }> = {
+    LOW: { min: 8, max: 24 },
+    MODERATE: { min: 25, max: 44 },
+    HIGH: { min: 45, max: 68 },
+    EXTREME: { min: 69, max: 92 },
+    UNKNOWN: { min: 25, max: 44 },
   };
 
-  const anchor = anchors[level] ?? 38;
-  const vulnBonus = Math.min(12, Math.round(vulnerabilityScore * 0.2));
-  const heatBonus = Math.min(
-    6,
-    Math.max(0, Math.round((heatIndexC - 27) * 0.12)),
-  );
+  const { min, max } = bands[level] ?? bands.UNKNOWN;
+  const hi = Number.isFinite(heatIndexC) ? heatIndexC : 27;
+  const hiStress = Math.min(1, Math.max(0, (hi - 20) / 35));
+  const vulnStress = Math.min(1, Math.max(0, vulnerabilityScore / 85));
+  const stress = hiStress * 0.5 + vulnStress * 0.5;
 
-  return Math.min(99, Math.max(5, anchor + vulnBonus + heatBonus));
+  return Math.round(min + stress * (max - min));
+}
+
+/** Public helper — display score (0–100) aligned to risk level + heat index + vulnerability. */
+export function computeRiskDisplayScore(
+  level: RiskLevelCategory,
+  vulnerabilityScore: number,
+  heatIndexC: number,
+): number {
+  return scoreFromLevel(level, vulnerabilityScore, heatIndexC);
 }
 
 function recommendedActionFor(level: RiskLevelCategory): string {
@@ -361,6 +471,8 @@ export function assessHeatRisk(input: {
     vulnerabilityScore,
     conditions,
   );
+
+  level = applyPagasaPersonalizedCeiling(level, environmentalLevel, input.heatIndexC);
 
   const riskScore = scoreFromLevel(level, vulnerabilityScore, input.heatIndexC);
   const reason = buildRiskExplanation(level, environmentalLevel, factors);

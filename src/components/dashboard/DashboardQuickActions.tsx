@@ -1,10 +1,10 @@
 import { useMemo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { AppText } from '@/components/ui/AppText';
 import { SectionHeader } from '@/components/ui/SectionHeader';
+import { Card } from '@/components/ui/Card';
 import { ROUTES } from '@/constants/routes';
 import { DASHBOARD_ICONS } from '@/constants/dashboardIcons';
 import { BorderRadius, FontSize, Spacing } from '@/constants/theme';
@@ -13,19 +13,23 @@ import { useResponsiveLayout } from '@/hooks/useResponsiveLayout';
 
 export function DashboardQuickActions() {
   const router = useRouter();
-  const { colors, shadows } = useTheme();
+  const { colors } = useTheme();
   const { size } = useResponsiveLayout();
 
   const styles = useMemo(
     () =>
       StyleSheet.create({
         container: { gap: Spacing.sm },
-        primaryWrap: {
-          borderRadius: BorderRadius.xl,
-          overflow: 'hidden',
-          ...shadows.glow,
+        actionRow: {
+          flexDirection: 'row',
+          gap: Spacing.sm,
         },
         primaryCard: {
+          flex: 1,
+          padding: 0,
+          overflow: 'hidden',
+        },
+        primaryInner: {
           flexDirection: 'row',
           alignItems: 'center',
           gap: Spacing.md,
@@ -35,71 +39,95 @@ export function DashboardQuickActions() {
           width: size.quickActionIcon,
           height: size.quickActionIcon,
           borderRadius: BorderRadius.md,
-          backgroundColor: 'rgba(255,255,255,0.18)',
+          backgroundColor: colors.primarySoft,
           alignItems: 'center',
           justifyContent: 'center',
+          borderWidth: 1,
+          borderColor: colors.accentPeach,
         },
-        primaryText: { flex: 1, gap: 4, minWidth: 0, flexShrink: 1 },
+        primaryText: { flex: 1, gap: 3, minWidth: 0 },
         primaryTitle: {
-          color: colors.onPrimary,
-          fontSize: FontSize.lg,
+          fontSize: FontSize.md,
           fontWeight: '800',
-          letterSpacing: -0.3,
+          letterSpacing: -0.2,
+          color: colors.text,
         },
         primarySubtitle: {
-          color: 'rgba(255,255,255,0.88)',
           fontSize: FontSize.sm,
-          lineHeight: 20,
+          lineHeight: 19,
+          color: colors.textSecondary,
         },
-        trailingIcon: {
-          opacity: 0.92,
+        secondaryCard: {
+          width: 108,
+          padding: 0,
         },
-        pressed: { opacity: 0.92, transform: [{ scale: 0.98 }] },
+        secondaryInner: {
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: Spacing.sm,
+          padding: Spacing.md,
+          minHeight: 88,
+        },
+        secondaryLabel: {
+          fontSize: FontSize.xs,
+          fontWeight: '700',
+          color: colors.textSecondary,
+          textAlign: 'center',
+        },
+        pressed: { opacity: 0.9, transform: [{ scale: 0.99 }] },
       }),
-    [colors, shadows, size.quickActionIcon],
+    [colors, size.quickActionIcon],
   );
 
   return (
     <View style={styles.container}>
       <SectionHeader
-        title="Quick Action"
-        subtitle="Start a personalized heat-risk check-in"
+        title="Quick Actions"
+        subtitle="Start a check-in or review conditions"
         icon={DASHBOARD_ICONS.quickAction.section}
       />
 
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel="Assess your heat risk"
-        onPress={() => router.navigate(ROUTES.ASSESSMENT)}
-        style={({ pressed }) => [styles.primaryWrap, pressed && styles.pressed]}
-      >
-        <LinearGradient
-          colors={[colors.primaryLight, colors.primary, colors.primaryDark]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.primaryCard}
+      <View style={styles.actionRow}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Assess your heat risk"
+          onPress={() => router.navigate(ROUTES.ASSESSMENT)}
+          style={({ pressed }) => [styles.primaryCard, pressed && styles.pressed]}
         >
-          <View style={styles.primaryIconWrap}>
-            <Ionicons
-              name={DASHBOARD_ICONS.quickAction.card}
-              size={24}
-              color={colors.onPrimary}
-            />
-          </View>
-          <View style={styles.primaryText}>
-            <AppText style={styles.primaryTitle}>Assess Risk</AppText>
-            <AppText style={styles.primarySubtitle}>
-              Uses your profile and live Tuguegarao conditions
-            </AppText>
-          </View>
-          <Ionicons
-            name={DASHBOARD_ICONS.quickAction.trailing}
-            size={22}
-            color="rgba(255,255,255,0.92)"
-            style={styles.trailingIcon}
-          />
-        </LinearGradient>
-      </Pressable>
+          <Card variant="outline" padded={false} style={{ flex: 1 }}>
+            <View style={styles.primaryInner}>
+              <View style={styles.primaryIconWrap}>
+                <Ionicons
+                  name={DASHBOARD_ICONS.quickAction.card}
+                  size={22}
+                  color={colors.primary}
+                />
+              </View>
+              <View style={styles.primaryText}>
+                <AppText style={styles.primaryTitle}>Risk Check-in</AppText>
+                <AppText style={styles.primarySubtitle}>
+                  Profile + live weather
+                </AppText>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+            </View>
+          </Card>
+        </Pressable>
+
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="View weather details"
+          onPress={() => router.navigate(ROUTES.WEATHER)}
+          style={({ pressed }) => [styles.secondaryCard, pressed && styles.pressed]}
+        >
+          <Card variant="soft" padded={false}>
+            <View style={styles.secondaryInner}>
+              <Ionicons name="cloud-outline" size={22} color={colors.primary} />
+              <AppText style={styles.secondaryLabel}>Weather</AppText>
+            </View>
+          </Card>
+        </Pressable>
+      </View>
     </View>
   );
 }

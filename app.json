@@ -3,7 +3,7 @@
     "name": "HIRAYA",
     "slug": "HIRAYA",
     "owner": "jigglypuff",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "scheme": "hiraya",
@@ -11,11 +11,11 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.hiraya.app",
-      "buildNumber": "3"
+      "buildNumber": "4"
     },
     "android": {
       "package": "com.hiraya.app",
-      "versionCode": 5,
+      "versionCode": 6,
       "permissions": [
         "android.permission.INTERNET",
         "android.permission.ACCESS_NETWORK_STATE"

@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { RiskResultPayload } from '@/types/prediction';
 import { RiskLevelBanner } from '@/components/result/RiskLevelBanner';
@@ -8,6 +9,7 @@ import { RiskExplanationSection } from '@/components/result/RiskExplanationSecti
 import { AppText } from '@/components/ui/AppText';
 import { Spacing } from '@/constants/theme';
 import { formatDateTime } from '@/utils/formatters';
+import { resolveRiskResultDisplay } from '@/utils/riskScore';
 
 interface RiskResultViewProps {
   payload: RiskResultPayload;
@@ -16,17 +18,19 @@ interface RiskResultViewProps {
 export function RiskResultView({ payload }: RiskResultViewProps) {
   const { prediction, weather, assessment, profile, submittedAt } = payload;
 
+  const display = useMemo(() => resolveRiskResultDisplay(payload), [payload]);
+
   return (
     <View style={styles.container}>
       <RiskLevelBanner
-        riskLevel={prediction.riskLevel}
-        score={prediction.prediction}
+        riskLevel={display.level}
+        score={display.score}
         assessedAt={submittedAt}
         heatIndexC={weather.heatIndex}
       />
 
       <RiskExplanationSection
-        riskLevel={prediction.riskLevel}
+        riskLevel={display.level}
         explanation={prediction.riskExplanation}
         primaryRiskFactors={prediction.primaryRiskFactors}
       />

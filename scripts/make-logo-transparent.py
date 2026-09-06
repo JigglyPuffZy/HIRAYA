@@ -1,4 +1,4 @@
-"""Strip white / soft glow background from HIRAYA logo for in-app use."""
+"""Strip background from HIRAYA logo — keep only sun + wordmark pixels."""
 from pathlib import Path
 
 from PIL import Image
@@ -10,39 +10,37 @@ if not SRC.exists():
     SRC = ASSETS / 'hiraya-logo.png'
 
 
-def alpha_for_pixel(r: int, g: int, b: int, a: int) -> int:
-    if a < 8:
-        return 0
+def chroma(r: int, g: int, b: int) -> int:
+    return max(r, g, b) - min(r, g, b)
+
+
+def is_foreground_pixel(r: int, g: int, b: int, a: int) -> bool:
+    if a < 12:
+        return False
 
     brightness = (r + g + b) / 3
-    saturation = max(r, g, b) - min(r, g, b)
+    saturation = chroma(r, g, b)
 
-    # Pure / near-white background
-    if r > 246 and g > 246 and b > 246:
-        return 0
+    # White / off-white background (older logo exports).
+    if r > 248 and g > 248 and b > 248:
+        return False
 
-    # Soft white-peach glow around the mark
-    if brightness > 215 and saturation < 55:
-        fade = int((248 - brightness) * 14)
-        return max(0, min(255, fade))
+    # Black background (newer logo exports).
+    if brightness < 18 and saturation < 25:
+        return False
 
-    # Very pale fringe pixels
-    if brightness > 185 and saturation < 35:
-        fade = int((230 - brightness) * 10)
-        return max(0, min(255, fade))
-
-    return 255
+    # Warm orange / red mark pixels.
+    return saturation >= 80 or (brightness >= 25 and saturation >= 50)
 
 
-def content_bbox(img: Image.Image, pad: int = 16):
+def content_bbox(img: Image.Image, pad: int = 10):
     pixels = img.load()
     w, h = img.size
     min_x, min_y, max_x, max_y = w, h, 0, 0
     found = False
     for y in range(h):
         for x in range(w):
-            _, _, _, a = pixels[x, y]
-            if a < 24:
+            if pixels[x, y][3] < 24:
                 continue
             found = True
             min_x = min(min_x, x)
@@ -64,13 +62,13 @@ def main() -> None:
     pixels = src.load()
     w, h = src.size
     transparent = Image.new('RGBA', (w, h), (0, 0, 0, 0))
+    out_pixels = transparent.load()
 
     for y in range(h):
         for x in range(w):
             r, g, b, a = pixels[x, y]
-            alpha = alpha_for_pixel(r, g, b, a)
-            if alpha > 0:
-                transparent.putpixel((x, y), (r, g, b, alpha))
+            if is_foreground_pixel(r, g, b, a):
+                out_pixels[x, y] = (r, g, b, 255)
 
     bbox = content_bbox(transparent)
     cropped = transparent.crop(bbox)

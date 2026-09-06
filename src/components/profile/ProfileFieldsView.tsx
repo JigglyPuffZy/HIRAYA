@@ -21,6 +21,8 @@ interface ProfileFieldsViewProps {
 const FIELD_ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
   age: 'calendar-outline',
   health_conditions: 'medkit-outline',
+  occupation: 'briefcase-outline',
+  typical_sun_exposure: 'sunny-outline',
   activity_level: 'walk-outline',
   hydration_status: 'water-outline',
   general_status: 'heart-outline',
@@ -36,6 +38,11 @@ const FIELD_GROUPS: { title: string; icon: keyof typeof Ionicons.glyphMap; ids: 
     title: 'Health & vulnerability',
     icon: 'fitness-outline',
     ids: ['health_conditions'],
+  },
+  {
+    title: 'Work & sun exposure',
+    icon: 'briefcase-outline',
+    ids: ['occupation', 'typical_sun_exposure'],
   },
   {
     title: 'Daily baseline',

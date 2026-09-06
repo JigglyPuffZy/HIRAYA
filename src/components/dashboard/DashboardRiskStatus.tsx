@@ -19,6 +19,7 @@ import {
 import { BorderRadius, Spacing } from '@/constants/theme';
 import { useResponsiveLayout } from '@/hooks/useResponsiveLayout';
 import { useTheme } from '@/context/ThemeContext';
+import { normalizeDisplayedRiskScore } from '@/utils/riskScore';
 
 interface DashboardRiskStatusProps {
   riskLevel?: string;
@@ -45,8 +46,8 @@ export function DashboardRiskStatus({
   const { colors, shadows } = useTheme();
   const { font, size } = useResponsiveLayout();
   const hasAssessment = Boolean(riskLevel);
-  const showPrediction =
-    typeof prediction === 'number' && Number.isFinite(prediction);
+  const displayScore = normalizeDisplayedRiskScore(prediction);
+  const showPrediction = typeof displayScore === 'number';
   const visual = hasAssessment ? getRiskLevelVisualStyle(riskLevel!) : null;
   const levelTitle = hasAssessment ? formatRiskLevelTitle(riskLevel!) : '';
   const scoreRingSize = size.scoreRing;
@@ -89,140 +90,121 @@ export function DashboardRiskStatus({
   return (
     <View accessibilityLabel="Heat-related risk status section">
       <SectionHeader
-        title="Your heat risk"
-        subtitle={
-          isRefreshing
-            ? 'Updating with latest weather...'
-            : 'Based on live weather and your profile'
-        }
+        title="Your Heat Risk"
+        subtitle="Based on live weather and your profile"
         icon={DASHBOARD_ICONS.risk.section}
       />
 
       <View style={styles.cardWrap}>
-        <Card variant="elevated" style={styles.card}>
+        <Card variant="elevated" style={styles.card} padded={false}>
           {isLoading ? <RiskStatusSkeleton /> : null}
 
-        {!isLoading && error ? (
-          <View style={styles.stateBlock}>
-            <ErrorMessage message={error} />
-            <Button title="Retry" variant="outline" onPress={onRetry} />
-          </View>
-        ) : null}
+          {!isLoading && error ? (
+            <View style={styles.stateBlock}>
+              <ErrorMessage message={error} />
+              <Button title="Retry" variant="outline" onPress={onRetry} />
+            </View>
+          ) : null}
 
-        {!isLoading && !error && hasAssessment && visual ? (
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={`Current heat risk level ${levelTitle}`}
-            onPress={handleOpenResult}
-            disabled={!assessmentId || assessmentId === 'current'}
-            style={({ pressed }) => [styles.riskContent, pressed && styles.pressed]}
-          >
-            <View
-              style={[
-                styles.riskHero,
-                {
-                  backgroundColor: visual.backgroundColor,
-                  borderColor: visual.borderColor,
-                },
-                shadows.sm,
-              ]}
+          {!isLoading && !error && hasAssessment && visual ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`Current heat risk level ${levelTitle}`}
+              onPress={handleOpenResult}
+              disabled={!assessmentId || assessmentId === 'current'}
+              style={({ pressed }) => [pressed && styles.pressed]}
             >
-              <View style={styles.riskAccent} />
-
-              <View style={styles.riskBody}>
-                <View style={styles.riskLeft}>
-                  <View style={styles.levelBadge}>
-                    <View style={[styles.levelDot, { backgroundColor: visual.accentColor }]} />
-                    <AppText
-                      variant="caption"
-                      style={{ color: visual.textColor, fontWeight: '700' }}
-                    >
-                      Current level
+              <View
+                style={[
+                  styles.riskHero,
+                  {
+                    backgroundColor: visual.backgroundColor,
+                    borderColor: visual.borderColor,
+                  },
+                ]}
+              >
+                <View style={[styles.riskStripe, { backgroundColor: visual.accentColor }]} />
+                <View style={styles.riskBody}>
+                  <View style={styles.riskLeft}>
+                    <AppText variant="caption" style={[styles.eyebrow, { color: visual.textColor }]}>
+                      CURRENT LEVEL
                     </AppText>
+                    <AppText
+                      style={[dynamicStyles.riskLevelWord, { color: visual.textColor }]}
+                      numberOfLines={2}
+                      adjustsFontSizeToFit
+                      minimumFontScale={0.65}
+                    >
+                      {levelTitle}
+                    </AppText>
+                    {assessedAt ? (
+                      <AppText
+                        variant="caption"
+                        style={{ color: visual.textColor, opacity: 0.8 }}
+                        numberOfLines={1}
+                      >
+                        Updated {formatRelativeTime(assessedAt)}
+                      </AppText>
+                    ) : null}
                   </View>
 
-                  <AppText
-                    style={[dynamicStyles.riskLevelWord, { color: visual.textColor }]}
-                    numberOfLines={2}
-                    adjustsFontSizeToFit
-                    minimumFontScale={0.65}
-                  >
-                    {levelTitle}
-                  </AppText>
-                  <AppText
-                    variant="caption"
-                    style={[styles.riskLevelSuffix, { color: visual.textColor }]}
-                  >
-                    Heat risk
-                  </AppText>
-
-                  {assessedAt ? (
-                    <AppText
-                      variant="caption"
-                      style={{ color: visual.textColor, opacity: 0.75 }}
-                      numberOfLines={1}
+                  {showPrediction ? (
+                    <View
+                      style={[
+                        dynamicStyles.scoreRing,
+                        {
+                          borderColor: visual.accentColor,
+                          backgroundColor: colors.chipBackgroundStrong,
+                        },
+                        shadows.sm,
+                      ]}
                     >
-                      Updated {formatRelativeTime(assessedAt)}
-                    </AppText>
+                      <AppText style={[dynamicStyles.scoreValue, { color: visual.accentColor }]}>
+                        {displayScore}
+                      </AppText>
+                      <AppText
+                        variant="caption"
+                        style={[styles.scoreLabel, { color: visual.textColor, opacity: 0.75 }]}
+                      >
+                        Score
+                      </AppText>
+                    </View>
                   ) : null}
                 </View>
-
-                {showPrediction ? (
-                  <View
-                    style={[
-                      dynamicStyles.scoreRing,
-                      {
-                        borderColor: visual.accentColor,
-                        backgroundColor: colors.chipBackgroundStrong,
-                      },
-                    ]}
-                  >
-                    <AppText style={[dynamicStyles.scoreValue, { color: visual.accentColor }]}>
-                      {Math.round(prediction!)}
-                    </AppText>
-                    <AppText
-                      variant="caption"
-                      style={[styles.scoreLabel, { color: visual.textColor, opacity: 0.8 }]}
-                    >
-                      Score
-                    </AppText>
-                  </View>
-                ) : null}
               </View>
-            </View>
 
-            {assessmentId && assessmentId !== 'current' ? (
-              <View style={styles.viewResultRow}>
-                <AppText variant="label" style={{ color: colors.primary }}>
-                  View full assessment
-                </AppText>
-                <Ionicons name={DASHBOARD_ICONS.risk.viewResult} size={16} color={colors.primary} />
+              {assessmentId && assessmentId !== 'current' ? (
+                <View style={[styles.viewResultRow, { borderTopColor: colors.borderLight }]}>
+                  <AppText variant="label" style={{ color: colors.primary }}>
+                    View full assessment
+                  </AppText>
+                  <Ionicons name={DASHBOARD_ICONS.risk.viewResult} size={16} color={colors.primary} />
+                </View>
+              ) : null}
+            </Pressable>
+          ) : null}
+
+          {!isLoading && !error && !hasAssessment ? (
+            <View style={styles.emptyState}>
+              <View
+                style={[
+                  styles.emptyIcon,
+                  {
+                    backgroundColor: colors.primarySoft,
+                    borderColor: colors.accentPeach,
+                  },
+                ]}
+              >
+                <Ionicons name={DASHBOARD_ICONS.risk.empty} size={26} color={colors.primary} />
               </View>
-            ) : null}
-          </Pressable>
-        ) : null}
-
-        {!isLoading && !error && !hasAssessment ? (
-          <View style={styles.emptyState}>
-            <View
-              style={[
-                styles.emptyIcon,
-                {
-                  backgroundColor: colors.primarySoft,
-                  borderColor: colors.accentPeach,
-                },
-              ]}
-            >
-              <Ionicons name={DASHBOARD_ICONS.risk.empty} size={26} color={colors.primary} />
+              <AppText variant="subtitle" style={styles.emptyText}>
+                No assessment yet
+              </AppText>
+              <AppText variant="caption" muted style={styles.emptyText}>
+                Run a quick check-in to get your personalized heat risk level and safety tips.
+              </AppText>
             </View>
-            <AppText variant="subtitle" style={styles.emptyText}>
-              No assessment yet
-            </AppText>
-            <AppText variant="caption" muted style={styles.emptyText}>
-              Run a quick check-in to get your personalized heat risk level and safety tips.
-            </AppText>
-          </View>
-        ) : null}
+          ) : null}
         </Card>
 
         {isRefreshing && !isLoading && hasAssessment ? (
@@ -238,22 +220,19 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   card: {
-    gap: Spacing.md,
+    overflow: 'hidden',
   },
   stateBlock: {
     gap: Spacing.md,
-  },
-  riskContent: {
-    gap: Spacing.md,
+    padding: Spacing.lg,
   },
   riskHero: {
-    borderRadius: BorderRadius.xl,
-    borderWidth: 1.5,
+    borderWidth: 0,
     overflow: 'hidden',
   },
-  riskAccent: {
+  riskStripe: {
     height: 4,
-    backgroundColor: 'rgba(0,0,0,0.08)',
+    width: '100%',
   },
   riskBody: {
     flexDirection: 'row',
@@ -265,28 +244,15 @@ const styles = StyleSheet.create({
   },
   riskLeft: {
     flex: 1,
-    gap: 4,
+    gap: 6,
     minWidth: 0,
     paddingRight: Spacing.xs,
     flexShrink: 1,
   },
-  levelBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginBottom: 2,
-  },
-  levelDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
-  riskLevelSuffix: {
+  eyebrow: {
     fontWeight: '700',
-    textTransform: 'uppercase',
     letterSpacing: 0.8,
-    fontSize: 11,
-    opacity: 0.85,
+    fontSize: 10,
   },
   scoreLabel: {
     fontSize: 10,
@@ -298,12 +264,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: Spacing.xs,
-    paddingTop: Spacing.xs,
+    paddingVertical: Spacing.md,
+    borderTopWidth: 1,
   },
   emptyState: {
     alignItems: 'center',
     gap: Spacing.sm,
-    paddingVertical: Spacing.lg,
+    paddingVertical: Spacing.xl,
+    paddingHorizontal: Spacing.lg,
   },
   emptyIcon: {
     width: 64,

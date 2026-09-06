@@ -1,8 +1,8 @@
 import { useMemo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import { AppText } from '@/components/ui/AppText';
+import { Card } from '@/components/ui/Card';
 import { UserProfile } from '@/types/userProfile';
 import { BorderRadius, FontSize, Spacing } from '@/constants/theme';
 import { formatDateTime } from '@/utils/formatters';
@@ -30,38 +30,19 @@ export function ProfileHero({
   onEditPress,
   editDisabled = false,
 }: ProfileHeroProps) {
-  const { colors, shadows } = useTheme();
+  const { colors } = useTheme();
   const initials = getInitials(profile.fullName);
 
   const styles = useMemo(
     () =>
       StyleSheet.create({
-        wrap: {
-          borderRadius: BorderRadius.xxl,
+        card: {
+          padding: 0,
           overflow: 'hidden',
-          borderWidth: 1,
-          borderColor: colors.accentPeach,
-          ...shadows.card,
         },
-        decorLarge: {
-          position: 'absolute',
-          width: 140,
-          height: 140,
-          borderRadius: 70,
-          backgroundColor: colors.primaryMuted,
-          opacity: 0.18,
-          top: -48,
-          right: -36,
-        },
-        decorSmall: {
-          position: 'absolute',
-          width: 72,
-          height: 72,
-          borderRadius: 36,
-          backgroundColor: colors.accentBlue,
-          opacity: 0.45,
-          bottom: -20,
-          left: -16,
+        stripe: {
+          height: 4,
+          backgroundColor: colors.primary,
         },
         inner: {
           padding: Spacing.lg,
@@ -72,23 +53,19 @@ export function ProfileHero({
           alignItems: 'flex-start',
           gap: Spacing.md,
         },
-        avatarRing: {
-          width: 76,
-          height: 76,
-          borderRadius: 38,
-          padding: 3,
-          backgroundColor: colors.glassBorder,
-        },
         avatar: {
-          flex: 1,
-          borderRadius: 35,
+          width: 72,
+          height: 72,
+          borderRadius: 36,
           alignItems: 'center',
           justifyContent: 'center',
-          backgroundColor: colors.primary,
+          backgroundColor: colors.accentNavySoft,
+          borderWidth: 2,
+          borderColor: colors.surface,
         },
         avatarText: {
-          color: colors.onPrimary,
-          fontSize: FontSize.xxl,
+          color: colors.accentNavy,
+          fontSize: FontSize.xl,
           fontWeight: '800',
           letterSpacing: -0.5,
         },
@@ -119,14 +96,14 @@ export function ProfileHero({
           fontSize: FontSize.xs,
         },
         editBtn: {
-          width: 42,
-          height: 42,
-          borderRadius: 14,
+          width: 40,
+          height: 40,
+          borderRadius: BorderRadius.md,
           alignItems: 'center',
           justifyContent: 'center',
-          backgroundColor: colors.chipBackgroundStrong,
+          backgroundColor: colors.surfaceMuted,
           borderWidth: 1,
-          borderColor: colors.glassBorder,
+          borderColor: colors.borderLight,
         },
         editBtnDisabled: {
           opacity: 0.45,
@@ -135,6 +112,10 @@ export function ProfileHero({
           flexDirection: 'row',
           alignItems: 'center',
           gap: Spacing.sm,
+          flexWrap: 'wrap',
+          paddingTop: Spacing.sm,
+          borderTopWidth: 1,
+          borderTopColor: colors.borderLight,
         },
         completionCard: {
           flex: 1,
@@ -143,10 +124,11 @@ export function ProfileHero({
           gap: Spacing.sm,
           paddingVertical: Spacing.sm,
           paddingHorizontal: Spacing.md,
-          borderRadius: BorderRadius.lg,
-          backgroundColor: colors.chipBackground,
+          borderRadius: BorderRadius.md,
+          backgroundColor: colors.surfaceMuted,
           borderWidth: 1,
-          borderColor: colors.glassBorder,
+          borderColor: colors.borderLight,
+          minWidth: 140,
         },
         completionTrack: {
           flex: 1,
@@ -163,7 +145,7 @@ export function ProfileHero({
         completionLabel: {
           fontSize: FontSize.xs,
           fontWeight: '700',
-          color: colors.primary,
+          color: colors.primaryDark,
           minWidth: 34,
           textAlign: 'right',
         },
@@ -186,29 +168,18 @@ export function ProfileHero({
         updatedText: {
           color: colors.textMuted,
           fontSize: FontSize.xs,
-          marginTop: -4,
         },
       }),
-    [colors, shadows, isEditing],
+    [colors, isEditing],
   );
 
   return (
-    <View style={styles.wrap}>
-      <LinearGradient
-        colors={[colors.heroGradientStart, colors.heroGradientMid, colors.heroGradientEnd]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={StyleSheet.absoluteFill}
-      />
-      <View style={styles.decorLarge} />
-      <View style={styles.decorSmall} />
-
+    <Card variant="elevated" padded={false} style={styles.card}>
+      <View style={styles.stripe} />
       <View style={styles.inner}>
         <View style={styles.topRow}>
-          <View style={styles.avatarRing}>
-            <View style={styles.avatar} accessibilityLabel={`Profile avatar for ${profile.fullName}`}>
-              <AppText style={styles.avatarText}>{initials}</AppText>
-            </View>
+          <View style={styles.avatar} accessibilityLabel={`Profile avatar for ${profile.fullName}`}>
+            <AppText style={styles.avatarText}>{initials}</AppText>
           </View>
 
           <View style={styles.identity}>
@@ -241,7 +212,7 @@ export function ProfileHero({
                 pressed && !editDisabled && { opacity: 0.88 },
               ]}
             >
-              <Ionicons name="create-outline" size={20} color={colors.primary} />
+              <Ionicons name="create-outline" size={18} color={colors.primary} />
             </Pressable>
           ) : null}
         </View>
@@ -276,6 +247,6 @@ export function ProfileHero({
           </AppText>
         ) : null}
       </View>
-    </View>
+    </Card>
   );
 }

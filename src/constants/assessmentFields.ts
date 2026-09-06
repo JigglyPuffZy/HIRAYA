@@ -1,9 +1,19 @@
 import { AssessmentFieldDefinition } from '@/types/assessment';
+import { TIME_IN_SUN_OPTIONS } from '@/constants/workSunExposure';
 
 /**
  * Session assessment fields — combined with profile for the decision tree engine.
  */
 export const ASSESSMENT_FIELD_DEFINITIONS: AssessmentFieldDefinition[] = [
+  {
+    id: 'time_in_sun',
+    type: 'select',
+    label: 'Time in direct sun today',
+    required: true,
+    placeholder: 'Select time in sun',
+    helperText: 'Include outdoor work, commuting, exercise, or errands in sunlight.',
+    options: TIME_IN_SUN_OPTIONS,
+  },
   {
     id: 'activity_level',
     type: 'select',

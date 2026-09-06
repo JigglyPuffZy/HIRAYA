@@ -1,0 +1,14 @@
+Case Index,Heat Index / Age,Occupation,Health Condition,Hydration,Activity Level,Expected Result,Actual Result,Status
+1,"25°C / Age 28","Indoor / office","None","Well hydrated","Low","Normal","Normal",Pass
+2,"27°C / Age 17","Student","None","Well hydrated","Moderate","Caution","Caution",Pass
+3,"28°C / Age 63","Other","None","Moderate","Low","Caution","Caution",Pass
+4,"29°C / Age 35","Outdoor work","Asthma","Moderate","Moderate","Extreme Caution","Extreme Caution",Pass
+5,"30°C / Age 48","Outdoor work","Hypertension","Moderate","High","Extreme Caution","Extreme Caution",Pass
+6,"31°C / Age 52","Mixed indoor & outdoor","Diabetes","Well hydrated","Moderate","Extreme Caution","Extreme Caution",Pass
+7,"33°C / Age 29","Outdoor work","None","Dehydrated","High","Extreme Caution","Extreme Caution",Pass
+8,"34°C / Age 58","Mixed indoor & outdoor","Heart disease","Moderate","Low","Extreme Caution","Extreme Caution",Pass
+9,"35°C / Age 61","Other","COPD, Obesity","Dehydrated","Moderate","Extreme Caution","Extreme Caution",Pass
+10,"37°C / Age 55","Outdoor work","Kidney disease","Dehydrated","High","Extreme Caution","Extreme Caution",Pass
+11,"38°C / Age 11","Student","None","Moderate","High","Extreme Caution","Extreme Caution",Pass
+12,"39°C / Age 67","Indoor / office","Hypertension, Diabetes","Moderate","Low","Extreme Caution","Extreme Caution",Pass
+13,"41°C / Age 42","Outdoor work","None","Dehydrated","High","Extreme Caution","Extreme Caution",Pass

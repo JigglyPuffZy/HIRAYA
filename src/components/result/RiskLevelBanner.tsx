@@ -7,9 +7,11 @@ import {
 } from '@/constants/riskLevels';
 import { formatPagasaHeatIndexSubtitle } from '@/config/risk-assessment.config';
 import { AppText } from '@/components/ui/AppText';
+import { Card } from '@/components/ui/Card';
 import { BorderRadius, FontSize, Spacing } from '@/constants/theme';
 import { useTheme } from '@/context/ThemeContext';
 import { formatRelativeTime } from '@/utils/formatters';
+import { normalizeDisplayedRiskScore } from '@/utils/riskScore';
 
 interface RiskLevelBannerProps {
   riskLevel: string;
@@ -32,14 +34,16 @@ export function RiskLevelBanner({
     typeof heatIndexC === 'number' && Number.isFinite(heatIndexC)
       ? formatPagasaHeatIndexSubtitle(heatIndexC)
       : null;
-  const showScore = typeof score === 'number' && Number.isFinite(score);
+  const displayScore = normalizeDisplayedRiskScore(score);
+  const showScore = displayScore !== undefined;
 
   return (
-    <View
+    <Card
+      variant="elevated"
+      padded={false}
       style={[
         styles.banner,
         {
-          backgroundColor: visual.backgroundColor,
           borderColor: visual.borderColor,
         },
         shadows.card,
@@ -47,45 +51,41 @@ export function RiskLevelBanner({
       accessibilityRole="summary"
       accessibilityLabel={`Heat risk level ${label}`}
     >
+      <View style={[styles.stripe, { backgroundColor: visual.accentColor }]} />
       <View style={styles.body}>
         <View style={styles.main}>
           <View style={styles.headerRow}>
-            <View style={[styles.iconWrap, { backgroundColor: `${visual.accentColor}33` }]}>
-              <Ionicons name="shield-checkmark" size={20} color={visual.textColor} />
+            <View style={[styles.iconWrap, { backgroundColor: `${visual.accentColor}22` }]}>
+              <Ionicons name="shield-checkmark" size={18} color={visual.accentColor} />
             </View>
-            <AppText variant="caption" style={[styles.eyebrow, { color: visual.textColor }]}>
-              Your result
+            <AppText variant="caption" style={[styles.eyebrow, { color: colors.textSecondary }]}>
+              YOUR RESULT
             </AppText>
           </View>
 
-          <AppText
-            style={[styles.level, { color: visual.textColor }]}
-            accessibilityRole="header"
-            numberOfLines={2}
-            adjustsFontSizeToFit
-            minimumFontScale={0.65}
-          >
-            {label}
-          </AppText>
-          <AppText
-            variant="caption"
-            style={[styles.levelSuffix, { color: visual.textColor }]}
-          >
-            Heat risk
-          </AppText>
-
-          <AppText variant="body" style={[styles.summary, { color: visual.textColor }]}>
-            {summary}
-          </AppText>
+          <View style={[styles.levelPanel, { backgroundColor: visual.backgroundColor, borderColor: visual.borderColor }]}>
+            <AppText
+              style={[styles.level, { color: visual.textColor }]}
+              accessibilityRole="header"
+              numberOfLines={2}
+              adjustsFontSizeToFit
+              minimumFontScale={0.65}
+            >
+              {label}
+            </AppText>
+            <AppText variant="caption" style={[styles.summary, { color: visual.textColor }]}>
+              {summary}
+            </AppText>
+          </View>
 
           {pagasaBand ? (
-            <AppText variant="caption" style={[styles.timestamp, { color: visual.textColor }]}>
+            <AppText variant="caption" muted>
               PAGASA heat index: {pagasaBand}
             </AppText>
           ) : null}
 
           {assessedAt ? (
-            <AppText variant="caption" style={[styles.timestamp, { color: visual.textColor }]}>
+            <AppText variant="caption" muted>
               Assessed {formatRelativeTime(assessedAt)}
             </AppText>
           ) : null}
@@ -97,28 +97,31 @@ export function RiskLevelBanner({
               styles.scoreRing,
               {
                 borderColor: visual.accentColor,
-                backgroundColor: colors.chipBackgroundStrong,
+                backgroundColor: colors.surface,
               },
+              shadows.sm,
             ]}
           >
-            <AppText style={[styles.scoreValue, { color: visual.textColor }]}>
-              {Math.round(score!)}
+            <AppText style={[styles.scoreValue, { color: visual.accentColor }]}>
+              {displayScore}
             </AppText>
-            <AppText variant="caption" style={[styles.scoreLabel, { color: visual.textColor }]}>
+            <AppText variant="caption" style={[styles.scoreLabel, { color: colors.textMuted }]}>
               Score
             </AppText>
           </View>
         ) : null}
       </View>
-    </View>
+    </Card>
   );
 }
 
 const styles = StyleSheet.create({
   banner: {
-    borderWidth: 1.5,
-    borderRadius: BorderRadius.xxl,
     overflow: 'hidden',
+  },
+  stripe: {
+    height: 4,
+    width: '100%',
   },
   body: {
     flexDirection: 'row',
@@ -137,38 +140,32 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
   },
   iconWrap: {
-    width: 34,
-    height: 34,
-    borderRadius: 11,
+    width: 32,
+    height: 32,
+    borderRadius: BorderRadius.md,
     alignItems: 'center',
     justifyContent: 'center',
   },
   eyebrow: {
     fontWeight: '700',
-    letterSpacing: 0.5,
-    textTransform: 'uppercase',
-    fontSize: 11,
+    letterSpacing: 0.8,
+    fontSize: 10,
+  },
+  levelPanel: {
+    borderWidth: 1,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.md,
+    gap: 4,
   },
   level: {
-    fontSize: FontSize.xxl,
+    fontSize: FontSize.xl,
     fontWeight: '800',
-    lineHeight: 34,
+    lineHeight: 30,
     letterSpacing: -0.5,
   },
-  levelSuffix: {
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
-    fontSize: 11,
-    opacity: 0.85,
-    marginTop: -2,
-  },
   summary: {
-    lineHeight: 22,
+    lineHeight: 20,
     opacity: 0.9,
-  },
-  timestamp: {
-    opacity: 0.75,
   },
   scoreRing: {
     width: 72,
@@ -188,6 +185,5 @@ const styles = StyleSheet.create({
     fontSize: 10,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
-    opacity: 0.8,
   },
 });

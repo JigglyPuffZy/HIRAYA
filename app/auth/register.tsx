@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Link, useRouter } from 'expo-router';
 import { AuthScreenLayout } from '@/components/auth/AuthScreenLayout';
@@ -8,6 +7,7 @@ import { AuthInput } from '@/components/auth/AuthInput';
 import { AuthButton } from '@/components/auth/AuthButton';
 import { ErrorMessage } from '@/components/ui/ErrorMessage';
 import { AppText } from '@/components/ui/AppText';
+import { Card } from '@/components/ui/Card';
 import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/context/ThemeContext';
 import { ROUTES } from '@/constants/routes';
@@ -17,11 +17,11 @@ import {
   isValidPassword,
   validateRequired,
 } from '@/utils/validation';
-import { BorderRadius, Spacing } from '@/constants/theme';
+import { Spacing } from '@/constants/theme';
 
 export default function RegisterScreen() {
   const router = useRouter();
-  const { colors, isDark, shadows } = useTheme();
+  const { colors } = useTheme();
   const { register, error, clearError } = useAuth();
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
@@ -74,27 +74,13 @@ export default function RegisterScreen() {
         subtitle="Join HIRAYA to monitor heat risk in real time."
       />
 
-      <View
-        style={[
-          styles.formCard,
-          shadows.card,
-          {
-            backgroundColor: isDark ? 'rgba(21, 31, 50, 0.92)' : colors.surface,
-            borderColor: isDark ? 'rgba(255,255,255,0.06)' : colors.borderLight,
-          },
-        ]}
-      >
-        <LinearGradient
-          colors={[colors.primaryLight, colors.primary]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-          style={styles.formAccent}
-        />
+      <Card variant="elevated" style={styles.formCard}>
         <View style={styles.form}>
           <AuthInput
             label="Full name"
             value={fullName}
             onChangeText={setFullName}
+            autoCapitalize="words"
             autoComplete="name"
             placeholder="Your full name"
             error={fieldErrors.fullName}
@@ -121,18 +107,14 @@ export default function RegisterScreen() {
 
           {error ? <ErrorMessage message={error} /> : null}
 
-          <AppText variant="caption" muted style={styles.hint}>
-            Use a valid email and a password with at least 8 characters.
-          </AppText>
-
           <AuthButton
-            title="Create account"
+            title="Create Account"
             onPress={handleRegister}
             loading={isSubmitting}
             fullWidth
           />
         </View>
-      </View>
+      </Card>
 
       <View style={styles.footer}>
         <AppText variant="body" muted>
@@ -143,7 +125,9 @@ export default function RegisterScreen() {
             accessibilityRole="button"
             style={({ pressed }) => pressed && styles.pressed}
           >
-            <AppText style={[styles.link, { color: colors.primary }]}>Sign in</AppText>
+            <AppText style={[styles.link, { color: colors.primary }]}>
+              Sign in
+            </AppText>
           </Pressable>
         </Link>
       </View>
@@ -154,22 +138,10 @@ export default function RegisterScreen() {
 const styles = StyleSheet.create({
   formCard: {
     width: '100%',
-    borderRadius: BorderRadius.xxl,
-    borderWidth: 1,
-    padding: Spacing.lg,
-    overflow: 'hidden',
-  },
-  formAccent: {
-    height: 3,
-    width: '100%',
-    marginBottom: Spacing.md,
-    borderRadius: 2,
   },
   form: {
     gap: Spacing.md,
-  },
-  hint: {
-    lineHeight: 18,
+    width: '100%',
   },
   footer: {
     alignItems: 'center',

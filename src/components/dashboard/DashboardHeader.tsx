@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { AppText } from '@/components/ui/AppText';
 import { BrandLogo } from '@/components/ui/BrandLogo';
-import { GradientSurface } from '@/components/ui/GradientSurface';
+import { Card } from '@/components/ui/Card';
 import { ROUTES } from '@/constants/routes';
 import { STUDY_AREA_LABEL } from '@/constants/study-area';
 import { formatRelativeTime } from '@/utils/formatters';
@@ -26,7 +26,7 @@ function getInitials(name?: string): string {
 
 export function DashboardHeader({ userName, lastUpdated }: DashboardHeaderProps) {
   const router = useRouter();
-  const { colors, shadows } = useTheme();
+  const { colors } = useTheme();
   const { font } = useResponsiveLayout();
   const greetingName = userName?.trim().split(' ')[0] || 'there';
   const greeting = getTimeBasedGreeting();
@@ -35,166 +35,146 @@ export function DashboardHeader({ userName, lastUpdated }: DashboardHeaderProps)
     () =>
       StyleSheet.create({
         container: { marginBottom: Spacing.xs },
-        heroCard: {
-          borderWidth: 1,
-          borderColor: colors.accentPeach,
-          ...shadows.card,
+        card: {
+          padding: 0,
+          overflow: 'hidden',
         },
-        decorCircleLarge: {
-          position: 'absolute',
-          width: 120,
-          height: 120,
-          borderRadius: 60,
-          backgroundColor: colors.primaryMuted,
-          opacity: 0.15,
-          top: -30,
-          right: -20,
+        topStripe: {
+          height: 4,
+          backgroundColor: colors.primary,
         },
-        decorCircleSmall: {
-          position: 'absolute',
-          width: 64,
-          height: 64,
-          borderRadius: 32,
-          backgroundColor: colors.accentBlue,
-          opacity: 0.35,
-          bottom: 20,
-          left: -16,
+        inner: {
+          padding: Spacing.lg,
+          gap: Spacing.md,
         },
-        heroInner: { padding: Spacing.lg, gap: Spacing.md },
-        heroTop: {
+        topRow: {
           flexDirection: 'row',
           alignItems: 'center',
           justifyContent: 'space-between',
         },
-        brandRow: { flexDirection: 'row', alignItems: 'center', flex: 1, minWidth: 0 },
-        profileButton: { borderRadius: BorderRadius.full },
-        pressed: { opacity: 0.85 },
-        avatarRing: {
-          padding: 2,
-          borderRadius: BorderRadius.full,
-          backgroundColor: colors.primaryMuted,
+        brandBlock: {
+          flex: 1,
+          minWidth: 0,
         },
+        profileButton: {
+          borderRadius: BorderRadius.full,
+        },
+        pressed: { opacity: 0.85 },
         avatar: {
-          width: 42,
-          height: 42,
-          borderRadius: 21,
-          backgroundColor: colors.surface,
+          width: 44,
+          height: 44,
+          borderRadius: 22,
+          backgroundColor: colors.accentNavySoft,
           alignItems: 'center',
           justifyContent: 'center',
-          borderWidth: 1,
-          borderColor: colors.borderLight,
+          borderWidth: 2,
+          borderColor: colors.surface,
         },
-        avatarText: { color: colors.primary, fontWeight: '800', fontSize: 15 },
-        greetingBlock: { gap: 2 },
+        avatarText: {
+          color: colors.accentNavy,
+          fontWeight: '800',
+          fontSize: 15,
+        },
         greetingEyebrow: {
-          color: colors.primary,
+          color: colors.primaryDark,
           fontWeight: '700',
           textTransform: 'uppercase',
-          letterSpacing: 0.8,
-          fontSize: 11,
+          letterSpacing: 1,
+          fontSize: 10,
+          marginBottom: 4,
         },
         greeting: {
           fontSize: font.heroGreeting,
-          lineHeight: Math.round(font.heroGreeting * 1.2),
+          lineHeight: Math.round(font.heroGreeting * 1.15),
           letterSpacing: -0.8,
           color: colors.text,
+          fontWeight: '800',
         },
-        subtitle: { lineHeight: 22, marginTop: 2 },
+        subtitle: {
+          lineHeight: 21,
+          marginTop: 4,
+          color: colors.textSecondary,
+        },
         metaRow: {
           flexDirection: 'row',
           alignItems: 'center',
           gap: Spacing.sm,
           flexWrap: 'wrap',
+          paddingTop: Spacing.xs,
+          borderTopWidth: 1,
+          borderTopColor: colors.borderLight,
         },
         metaChip: {
           flexDirection: 'row',
           alignItems: 'center',
-          gap: 4,
-          backgroundColor: colors.chipBackground,
+          gap: 5,
+          backgroundColor: colors.surfaceMuted,
           paddingHorizontal: Spacing.sm,
           paddingVertical: 6,
           borderRadius: BorderRadius.full,
           borderWidth: 1,
           borderColor: colors.borderLight,
-          flexShrink: 0,
         },
-        metaChipMuted: {
-          flex: 1,
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: 4,
-          backgroundColor: colors.chipBackground,
-          paddingHorizontal: Spacing.sm,
-          paddingVertical: 6,
-          borderRadius: BorderRadius.full,
-          borderWidth: 1,
-          borderColor: colors.borderLight,
-          minWidth: 0,
-        },
-        metaText: { color: colors.textSecondary, fontWeight: '600' },
-        metaTextMuted: {
-          flex: 1,
+        metaText: {
+          color: colors.textSecondary,
+          fontWeight: '600',
+          fontSize: 11,
         },
       }),
-    [colors, shadows, font.heroGreeting],
+    [colors, font.heroGreeting],
   );
 
   return (
     <View style={styles.container}>
-      <GradientSurface preset="hero" style={styles.heroCard}>
-        <View style={styles.decorCircleLarge} />
-        <View style={styles.decorCircleSmall} />
-
-        <View style={styles.heroInner}>
-          <View style={styles.heroTop}>
-            <View style={styles.brandRow}>
+      <Card variant="elevated" padded={false} style={styles.card}>
+        <View style={styles.topStripe} />
+        <View style={styles.inner}>
+          <View style={styles.topRow}>
+            <View style={styles.brandBlock}>
               <BrandLogo size="sm" />
             </View>
-
             <Pressable
               accessibilityRole="button"
               accessibilityLabel="Open profile"
               onPress={() => router.navigate(ROUTES.PROFILE)}
               style={({ pressed }) => [styles.profileButton, pressed && styles.pressed]}
             >
-              <View style={styles.avatarRing}>
-                <View style={styles.avatar}>
-                  <AppText style={styles.avatarText}>{getInitials(userName)}</AppText>
-                </View>
+              <View style={styles.avatar}>
+                <AppText style={styles.avatarText}>{getInitials(userName)}</AppText>
               </View>
             </Pressable>
           </View>
 
-          <View style={styles.greetingBlock}>
+          <View>
             <AppText variant="caption" style={styles.greetingEyebrow}>
               {greeting}
             </AppText>
-            <AppText variant="title" style={styles.greeting} numberOfLines={2}>
+            <AppText variant="title" style={styles.greeting} numberOfLines={1}>
               {greetingName}
             </AppText>
-            <AppText variant="body" muted style={styles.subtitle}>
-              Monitoring heat risk in {STUDY_AREA_LABEL}
+            <AppText variant="body" style={styles.subtitle}>
+              Heat safety overview · {STUDY_AREA_LABEL}
             </AppText>
           </View>
 
           <View style={styles.metaRow}>
             <View style={styles.metaChip}>
-              <Ionicons name="location" size={14} color={colors.primary} />
+              <Ionicons name="location-outline" size={13} color={colors.primary} />
               <AppText variant="caption" style={styles.metaText}>
-                Live area
+                Live monitoring
               </AppText>
             </View>
             {lastUpdated ? (
-              <View style={styles.metaChipMuted}>
-                <Ionicons name="time-outline" size={14} color={colors.textMuted} />
-                <AppText variant="caption" muted style={styles.metaTextMuted} numberOfLines={1}>
-                  Updated {formatRelativeTime(lastUpdated)}
+              <View style={styles.metaChip}>
+                <Ionicons name="sync-outline" size={13} color={colors.textMuted} />
+                <AppText variant="caption" style={styles.metaText}>
+                  {formatRelativeTime(lastUpdated)}
                 </AppText>
               </View>
             ) : null}
           </View>
         </View>
-      </GradientSurface>
+      </Card>
     </View>
   );
 }

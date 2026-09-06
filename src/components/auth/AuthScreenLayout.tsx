@@ -24,15 +24,14 @@ export function AuthScreenLayout({ children, contentStyle }: AuthScreenLayoutPro
   const { screenPadding, maxContentWidth } = useResponsiveLayout();
 
   const backdrop = isDark
-    ? (['#05060A', '#0B0F17', '#120D14'] as const)
-    : ([colors.background, colors.backgroundAlt, colors.primarySoft] as const);
+    ? (['#05060A', '#0A0F18', '#121A28'] as const)
+    : ([colors.background, colors.backgroundAlt, colors.surfaceMuted] as const);
 
   return (
     <View style={styles.root}>
       <LinearGradient colors={[...backdrop]} style={StyleSheet.absoluteFill} />
-      <View style={[styles.orbTop, { backgroundColor: isDark ? '#EA580C' : colors.primaryMuted }]} />
-      <View style={[styles.orbBottom, { backgroundColor: isDark ? '#9A3412' : colors.accentBlue }]} />
-      <View style={styles.vignette} />
+      <View style={[styles.orbTop, { backgroundColor: isDark ? colors.primary : colors.accentNavySoft }]} />
+      <View style={[styles.orbBottom, { backgroundColor: isDark ? colors.accentNavySoft : colors.primarySoft }]} />
 
       <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
         <KeyboardAvoidingView
@@ -51,9 +50,7 @@ export function AuthScreenLayout({ children, contentStyle }: AuthScreenLayoutPro
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
           >
-            <View
-              style={[styles.content, { maxWidth: maxContentWidth }, contentStyle]}
-            >
+            <View style={[styles.content, { maxWidth: maxContentWidth }, contentStyle]}>
               {children}
             </View>
           </ScrollView>
@@ -73,32 +70,28 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
   },
-  vignette: {
-    ...StyleSheet.absoluteFill,
-    backgroundColor: 'rgba(0,0,0,0.12)',
-  },
   orbTop: {
     position: 'absolute',
-    width: 300,
-    height: 300,
-    borderRadius: 150,
-    opacity: 0.14,
-    top: -110,
-    right: -90,
+    width: 280,
+    height: 280,
+    borderRadius: 140,
+    opacity: 0.35,
+    top: -100,
+    right: -80,
   },
   orbBottom: {
     position: 'absolute',
-    width: 260,
-    height: 260,
-    borderRadius: 130,
-    opacity: 0.1,
-    bottom: 20,
-    left: -100,
+    width: 220,
+    height: 220,
+    borderRadius: 110,
+    opacity: 0.3,
+    bottom: 40,
+    left: -80,
   },
   scrollContent: {
     flexGrow: 1,
     justifyContent: 'center',
-    paddingTop: Spacing.lg,
+    paddingTop: Spacing.xl,
   },
   content: {
     gap: Spacing.lg,

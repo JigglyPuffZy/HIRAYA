@@ -2,9 +2,12 @@ import { StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/ui/AppText';
 import { Card } from '@/components/ui/Card';
-import { Colors, BorderRadius, Spacing } from '@/constants/theme';
+import { BorderRadius, Spacing } from '@/constants/theme';
+import { useTheme } from '@/context/ThemeContext';
 
 export function AssessmentHistoryEmptyState() {
+  const { colors } = useTheme();
+
   return (
     <Card
       variant="soft"
@@ -12,12 +15,12 @@ export function AssessmentHistoryEmptyState() {
       accessibilityRole="text"
       accessibilityLabel="No assessment history yet"
     >
-      <View style={styles.iconWrap}>
-        <Ionicons name="time-outline" size={28} color={Colors.primary} />
+      <View style={[styles.iconWrap, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}>
+        <Ionicons name="time-outline" size={28} color={colors.primary} />
       </View>
       <AppText variant="subtitle">No assessments yet</AppText>
       <AppText variant="body" muted style={styles.body}>
-        Check-ins are always saved. Auto-refreshes appear when temperature or risk changes.
+        Check-ins are saved automatically. Auto-refreshes appear when temperature or risk changes.
       </AppText>
     </Card>
   );
@@ -33,12 +36,10 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: BorderRadius.full,
-    backgroundColor: Colors.surface,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: Spacing.xs,
     borderWidth: 1,
-    borderColor: '#FFEDD5',
   },
   body: {
     textAlign: 'center',

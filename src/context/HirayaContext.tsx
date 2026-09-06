@@ -30,6 +30,9 @@ import {
 } from '@/types/environmental';
 import { HeatRiskAssessmentResult } from '@/types/riskAssessment';
 import { AssessmentInputData, HeatRiskPrediction } from '@/types/prediction';
+import { normalizeDisplayedRiskScore, resolveRiskResultDisplay } from '@/utils/riskScore';
+import { computeRiskDisplayScore } from '@/services/decision-tree/heat-risk-classifier';
+import { resolveRiskLevelCategory } from '@/constants/riskLevels';
 
 interface HirayaContextValue {
   heatReading: HeatReading | null;
@@ -52,10 +55,40 @@ function latestToAssessment(
   prediction: HeatRiskPrediction,
   payloadSubmittedAt: string,
   heatIndex?: number,
+  payload?: { weather: { heatIndex: number }; assessment?: AssessmentInputData; profile?: AssessmentInputData },
 ): HeatRiskAssessmentResult {
+  if (payload) {
+    const display = resolveRiskResultDisplay({
+      prediction,
+      weather: payload.weather as import('@/types/prediction').NormalizedWeatherData,
+      assessment: payload.assessment ?? {},
+      profile: payload.profile ?? {},
+      submittedAt: payloadSubmittedAt,
+    });
+    return {
+      level: display.level,
+      riskScore: display.score,
+      environmentalLevel: display.level,
+      vulnerabilityScore: 0,
+      primaryRiskFactors: prediction.primaryRiskFactors ?? prediction.recommendations?.slice(1) ?? [],
+      reason: prediction.riskExplanation ?? 'Loaded from your most recent assessment.',
+      recommendedAction:
+        prediction.recommendations?.[0] ??
+        'Review your heat safety plan for Tuguegarao.',
+      heatIndexC: heatIndex ?? payload.weather.heatIndex ?? 0,
+      assessedAt: payloadSubmittedAt,
+    };
+  }
+
   return {
     level: prediction.riskLevel as HeatRiskAssessmentResult['level'],
-    riskScore: prediction.prediction,
+    riskScore:
+      normalizeDisplayedRiskScore(prediction.prediction) ??
+      computeRiskDisplayScore(
+        resolveRiskLevelCategory(prediction.riskLevel),
+        0,
+        heatIndex ?? 0,
+      ),
     environmentalLevel: prediction.riskLevel as HeatRiskAssessmentResult['environmentalLevel'],
     vulnerabilityScore: 0,
     primaryRiskFactors: prediction.recommendations?.slice(1) ?? [],
@@ -279,6 +312,11 @@ export function HirayaProvider({ children }: { children: ReactNode }) {
             latest.payload.prediction,
             latest.payload.submittedAt,
             latest.payload.weather.heatIndex,
+            {
+              weather: latest.payload.weather,
+              assessment: latest.payload.assessment,
+              profile: latest.payload.profile,
+            },
           );
         });
       }
